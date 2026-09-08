@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOM-035 · Generador de resultados</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+:root{
+  --navy:#1B3A5C; --navy-d:#12293F; --steel:#4A7194; --muted:#6E8398;
+  --line:#DCE5ED; --light:#F1F5F9; --page:#F7F9FB; --ink:#1E2A35; --white:#fff;
+  --muyalto:#C00000; --alto:#D97706; --medio:#EAB308; --bajo:#5C9E45; --nulo:#7EB4D6;
+  --ok:#5C9E45; --warn:#D97706; --bad:#C00000;
+  --r:10px; --sh:0 1px 2px rgba(20,40,60,.06),0 4px 14px rgba(20,40,60,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+a{color:var(--steel)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+
+/* ---------------------------------------------------------------- header */
+header{background:var(--navy-d);color:#fff;padding:22px 0 20px}
+header .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.logo{width:38px;height:38px;border-radius:9px;background:var(--steel);display:grid;
+  place-items:center;font-weight:700;font-size:13px;flex:none}
+header h1{font-size:19px}
+header .sub{font-size:12.5px;color:#9FBBD2;margin-top:2px}
+.privacy{margin-left:auto;font-size:12px;color:#9FBBD2;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);padding:7px 12px;border-radius:20px}
+
+/* ------------------------------------------------------------------ tabs */
+nav.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+nav.tabs .wrap{display:flex;gap:2px;overflow-x:auto}
+.tab{padding:13px 16px;font-size:13.5px;font-weight:550;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:0;
+  border-left:0;border-right:0;font-family:inherit}
+.tab:hover{color:var(--navy)}
+.tab.on{color:var(--navy);border-bottom-color:var(--navy)}
+.tab:disabled{opacity:.38;cursor:not-allowed}
+main{padding:26px 0 70px}
+.panel{display:none}
+.panel.on{display:block}
+
+/* ----------------------------------------------------------------- cards */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.card.pad{padding:20px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:940px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.sect{margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.5}
+
+/* ------------------------------------------------------------ drop zones */
+.drop{border:1.5px dashed #C3D2DF;border-radius:var(--r);background:#fff;padding:20px;
+  text-align:left;transition:.15s;cursor:pointer;position:relative}
+.drop:hover,.drop.over{border-color:var(--steel);background:#FAFCFE}
+.drop.done{border-style:solid;border-color:#BEDCC0;background:#F5FBF5}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop .t{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px}
+.drop .d{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.45}
+.badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:20px;
+  text-transform:uppercase}
+.badge.req{background:#FDECEC;color:var(--bad)}
+.badge.opt{background:var(--light);color:var(--muted)}
+.badge.ok{background:#EAF6EA;color:#3F7A2E}
+.fname{font-size:12px;color:#3F7A2E;margin-top:7px;font-weight:550;word-break:break-all}
+
+/* ----------------------------------------------------------------- stats */
+.stat{padding:16px 18px}
+.stat .k{font-size:11.5px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted)}
+.stat .v{font-size:30px;font-weight:700;margin-top:5px;letter-spacing:-.02em}
+.stat .n{font-size:12px;color:var(--muted);margin-top:3px}
+.big{padding:22px;border-radius:var(--r);color:var(--navy)}
+.big .k{font-size:12.5px;opacity:.85}
+.big .v{font-size:46px;font-weight:750;line-height:1.05;margin:6px 0 2px;letter-spacing:-.03em}
+
+/* ----------------------------------------------------------------- table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);padding:0 10px 9px;white-space:nowrap}
+td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:middle}
+tbody tr:hover{background:#FAFCFE}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:650;width:64px}
+td.mid{text-align:center}
+.chip{display:inline-block;min-width:74px;text-align:center;padding:3px 9px;border-radius:20px;
+  font-size:11.5px;font-weight:700;color:#fff}
+.chip.d{color:var(--navy)}
+.cnt{display:inline-grid;grid-auto-flow:column;gap:4px}
+.cnt i{width:30px;height:24px;border-radius:5px;display:grid;place-items:center;font-size:11.5px;
+  font-weight:700;font-style:normal;border:1px solid var(--line);color:#C7D3DE;background:#FAFCFE}
+.bar{height:7px;border-radius:4px;background:var(--light);overflow:hidden;min-width:70px}
+.bar>i{display:block;height:100%;border-radius:4px}
+
+/* ----------------------------------------------------------------- notes */
+.note{border-radius:var(--r);padding:14px 16px;font-size:13px;line-height:1.55;
+  background:var(--light);border:1px solid var(--line)}
+.note.w{background:#FFF8EC;border-color:#F5DFB6}
+.note.e{background:#FDF0F0;border-color:#F2C9C9}
+.note.g{background:#F3FAF3;border-color:#CDE8CD}
+.note b{font-weight:650}
+.diag{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.diag:first-child{border-top:0}
+.dot{width:20px;height:20px;border-radius:50%;flex:none;display:grid;place-items:center;
+  color:#fff;font-size:12px;font-weight:700;margin-top:1px}
+.diag .tx{font-size:13.5px;line-height:1.5}
+.diag .tx b{font-weight:650}
+.diag .tx span{color:var(--muted);font-size:12.5px}
+
+/* --------------------------------------------------------------- buttons */
+.btn{font:inherit;font-size:13.5px;font-weight:600;padding:10px 17px;border-radius:8px;
+  border:1px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;transition:.14s}
+.btn:hover{background:#254E77}
+.btn.sec{background:#fff;color:var(--navy)}
+.btn.sec:hover{background:var(--light)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.lg{padding:13px 22px;font-size:14.5px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tog{display:flex;align-items:center;gap:9px;font-size:13.5px;cursor:pointer;
+  padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.tog input{accent-color:var(--navy);width:15px;height:15px}
+.tog.on{border-color:var(--steel);background:#F6FAFD}
+.yr{width:78px;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--line);
+  border-radius:7px}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:54px 20px;color:var(--muted);font-size:14px}
+.rsv{font-size:12.5px;color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="logo">035</div>
+  <div>
+    <h1>NOM-035 · Generador de resultados</h1>
+    <div class="sub">Guías de Referencia I y III · Factores de riesgo psicosocial y entorno organizacional</div>
+  </div>
+  <div class="privacy">Todo se procesa en tu navegador — ningún archivo se sube a un servidor</div>
+</div></header>
+
+<nav class="tabs"><div class="wrap">
+  <button class="tab on" data-p="carga">1 · Cargar datos</button>
+  <button class="tab" data-p="diag" disabled>2 · Diagnóstico</button>
+  <button class="tab" data-p="res" disabled>3 · Resultados</button>
+  <button class="tab" data-p="cortes" disabled>4 · Segmentaciones</button>
+  <button class="tab" data-p="hist" disabled>5 · Comparativo</button>
+  <button class="tab" data-p="desc" disabled>6 · Descargas</button>
+</div></nav>
+
+<main><div class="wrap">
+
+<!-- ================================================================ CARGA -->
+<section class="panel on" id="p-carga">
+  <div class="grid g2" style="margin-bottom:16px">
+    <div>
+      <div class="sect">Cuestionarios</div>
+      <div class="grid" style="gap:12px">
+        <label class="drop" id="d-g3"><input type="file" accept=".xlsx,.xls,.csv">
+          <div class="t">Guía III — Factores de riesgo psicosocial <span class="badge req">Requerido</span></div>
+          <div class="d">Export del cuestionario de 72 ítems. Las columnas se reconocen por el texto de cada pregunta, no por su posición.</div>
+          <div class="fname"></div></label>
+        <label class="drop" id="d-g1"><input type="file" accept=".xlsx,.xls,.csv">
+          <div class="t">Guía I — Acontecimientos traumáticos severos <span class="badge opt">Opcional</span></div>
+          <div class="d">Export del cuestionario de ATS: 6 acontecimientos y 14 preguntas de síntomas.</div>
+          <div class="fname"></div></label>
+      </div>
+    </div>
+    <div>
+      <div class="sect">Padrón de colaboradores</div>
+      <label class="drop" id="d-pad" style="height:calc(100% - 26px)"><input type="file" accept=".xlsx,.xls,.csv">
+        <div class="t">Usuarios <span class="badge opt">Recomendado</span></div>
+        <div class="d">Sirve para segmentar. Necesita una columna con el número de empleado para cruzar con las respuestas; cualquier otra columna se ofrece como corte.
+        <br><br>Se reconocen automáticamente: <b>Área</b>, <b>Fecha de contratación</b> (antigüedad) y <b>Género</b> o <b>Sexo</b> si viene declarado.</div>
+        <div class="fname"></div></label>
+    </div>
+  </div>
+
+  <div class="sect">Mediciones de años anteriores <span style="text-transform:none;letter-spacing:0;font-weight:400"> — para el comparativo por dominio</span></div>
+  <div class="card pad" style="margin-bottom:16px">
+    <div id="hist-list" class="grid" style="gap:10px;margin-bottom:12px"></div>
+    <label class="drop" id="d-hist" style="padding:14px"><input type="file" accept=".xlsx,.xls,.csv" multiple>
+      <div class="t" style="font-size:13.5px">Agregar export de Guía III de otro año</div>
+      <div class="d">Podés cargar varios. Después le asignás el año a cada uno.</div></label>
+  </div>
+
+  <div class="card pad" style="margin-bottom:16px">
+    <div class="sect">Opciones</div>
+    <div class="row">
+      <label class="tog" id="t-gen"><input type="checkbox"> Inferir género del nombre de pila</label>
+      <label class="tog on" id="t-rsv"><input type="checkbox" checked> Reservar segmentos con menos de 3 personas</label>
+      <label class="row" style="gap:8px;margin-left:4px">Empresa
+        <input class="yr" id="f-emp" style="width:230px" placeholder="Nombre del centro de trabajo"></label>
+    </div>
+    <div class="hint" style="margin-top:11px" id="opt-hint"></div>
+  </div>
+
+  <div class="row">
+    <button class="btn lg" id="go" disabled>Procesar</button>
+    <span class="hint" id="go-hint">Cargá al menos el export de Guía III.</span>
+  </div>
+</section>
+
+<!-- ============================================================ DIAGNOSTICO -->
+<section class="panel" id="p-diag">
+  <div class="grid g4" id="diag-stats" style="margin-bottom:18px"></div>
+  <div class="grid g2">
+    <div class="card pad"><div class="sect">Mapeo del cuestionario</div><div id="diag-map"></div></div>
+    <div class="card pad"><div class="sect">Cruce con el padrón</div><div id="diag-pad"></div></div>
+  </div>
+  <div style="margin-top:16px" id="diag-notes"></div>
+</section>
+
+<!-- ============================================================= RESULTADOS -->
+<section class="panel" id="p-res">
+  <div class="grid" style="grid-template-columns:320px 1fr;gap:16px;margin-bottom:18px" id="res-top"></div>
+  <div class="card pad" style="margin-bottom:16px">
+    <div class="sect">Las cinco categorías</div><div id="res-cat"></div></div>
+  <div class="card pad" style="margin-bottom:16px">
+    <div class="sect">Los diez dominios</div><div id="res-dom"></div></div>
+  <div id="res-foco"></div>
+  <div id="res-g1" style="margin-top:16px"></div>
+</section>
+
+<!-- =============================================================== CORTES -->
+<section class="panel" id="p-cortes">
+  <div class="card pad" style="margin-bottom:16px">
+    <div class="sect">Elegí las segmentaciones</div>
+    <div class="row" id="cut-picker"></div>
+  </div>
+  <div id="cut-out"></div>
+</section>
+
+<!-- ============================================================ COMPARATIVO -->
+<section class="panel" id="p-hist"><div id="hist-out"></div></section>
+
+<!-- ============================================================== DESCARGAS -->
+<section class="panel" id="p-desc">
+  <div class="grid g2">
+    <div class="card pad">
+      <div class="sect">Libro de Excel</div>
+      <p class="hint" style="margin:0 0 14px">Resumen con niveles coloreados, una fila por colaborador con sus 5 categorías y 10 dominios, el detalle de puntajes ítem por ítem, las segmentaciones y el diagnóstico del mapeo. Con formato, no un volcado de datos.</p>
+      <button class="btn" id="dl-xlsx">Descargar .xlsx</button>
+    </div>
+    <div class="card pad">
+      <div class="sect">Reporte en PowerPoint</div>
+      <p class="hint" style="margin:0 0 14px">El deck de resultados: portada con el alcance, resultado general, categorías, dominios, foco de riesgo, segmentaciones, Guía I, comparativo histórico y pendientes. Editable.</p>
+      <button class="btn" id="dl-pptx">Descargar .pptx</button>
+      <div class="hint" id="pptx-hint" style="margin-top:9px"></div>
+    </div>
+  </div>
+  <div class="note w" style="margin-top:16px">
+    <b>Antes de compartirlo.</b> El reporte lleva en la portada la leyenda «muestra de parametrización» mientras la participación sea baja o la población quede sin cubrir. Los datos individuales de riesgo psicosocial son confidenciales por la propia norma: revisá los segmentos reservados antes de publicar cualquier corte.
+  </div>
+</section>
+
+</div></main>
+
+<script>var OPTS=["Siempre", "Casi siempre", "Algunas veces", "Casi nunca", "Nunca"];
+var ITEMS=[{"n": 1, "q": "El espacio donde trabajo me permite realizar mis actividades de manera segura e higiénica", "s": [0, 1, 2, 3, 4]}, {"n": 2, "q": "Mi trabajo me exige hacer mucho esfuerzo físico", "s": [4, 3, 2, 1, 0]}, {"n": 3, "q": "Me preocupa sufrir un accidente en mi trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 4, "q": "Considero que en mi trabajo se aplican las normas de seguridad y salud en el trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 5, "q": "Considero que las actividades que realizo son peligrosas", "s": [4, 3, 2, 1, 0]}, {"n": 6, "q": "Por la cantidad de trabajo que tengo debo quedarme tiempo adicional a mi turno", "s": [4, 3, 2, 1, 0]}, {"n": 7, "q": "Por la cantidad de trabajo que tengo debo trabajar sin parar", "s": [4, 3, 2, 1, 0]}, {"n": 8, "q": "Considero que es necesario mantener un ritmo de trabajo acelerado", "s": [4, 3, 2, 1, 0]}, {"n": 9, "q": "Mi trabajo exige que esté muy concentrado", "s": [4, 3, 2, 1, 0]}, {"n": 10, "q": "Mi trabajo requiere que memorice mucha información", "s": [4, 3, 2, 1, 0]}, {"n": 11, "q": "En mi trabajo tengo que tomar decisiones difíciles muy rápido", "s": [4, 3, 2, 1, 0]}, {"n": 12, "q": "Mi trabajo exige que atienda varios asuntos al mismo tiempo", "s": [4, 3, 2, 1, 0]}, {"n": 13, "q": "En mi trabajo soy responsable de cosas de mucho valor", "s": [4, 3, 2, 1, 0]}, {"n": 14, "q": "Respondo ante mi jefe por los resultados de toda mi área de trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 15, "q": "En el trabajo me dan órdenes contradictorias", "s": [4, 3, 2, 1, 0]}, {"n": 16, "q": "Considero que en mi trabajo me piden hacer cosas innecesarias", "s": [4, 3, 2, 1, 0]}, {"n": 17, "q": "Trabajo horas extras más de tres veces a la semana", "s": [4, 3, 2, 1, 0]}, {"n": 18, "q": "Mi trabajo me exige laborar en días de descanso ,festivos o fines de semana", "s": [4, 3, 2, 1, 0]}, {"n": 19, "q": "Considero que el tiempo en el trabajo es mucho y perjudica mis actividades familiares o personales", "s": [4, 3, 2, 1, 0]}, {"n": 20, "q": "Debo atender asuntos de trabajo cuando estoy en casa", "s": [4, 3, 2, 1, 0]}, {"n": 21, "q": "Pienso en las actividades familiares o personales cuando estoy en mi trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 22, "q": "Pienso que mis responsabilidades familiares afectan mi trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 23, "q": "Mi trabajo permite que desarrolle nuevas habilidades", "s": [0, 1, 2, 3, 4]}, {"n": 24, "q": "En mi trabajo puedo aspirar a un mejor puesto", "s": [0, 1, 2, 3, 4]}, {"n": 25, "q": "Durante mi jornada de trabajo puedo tomar pausas cuando las necesito", "s": [0, 1, 2, 3, 4]}, {"n": 26, "q": "Puedo decidir cuánto trabajo realizo durante la jornada laboral", "s": [0, 1, 2, 3, 4]}, {"n": 27, "q": "Puedo decidir la velocidad a la que realizo mis actividades en mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 28, "q": "Puedo cambiar el orden de las actividades que realizo en mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 29, "q": "Los cambios que se presentan en mi trabajo dificultan mi labor", "s": [4, 3, 2, 1, 0]}, {"n": 30, "q": "Cuando se presentan cambios en mi trabajo se tienen en cuenta mis ideas o aportaciones", "s": [0, 1, 2, 3, 4]}, {"n": 31, "q": "Me informan con claridad cuáles son mis funciones", "s": [0, 1, 2, 3, 4]}, {"n": 32, "q": "Me explican claramente los resultados que debo obtener en mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 33, "q": "Me explican claramente los objetivos de mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 34, "q": "Me informan con quién puedo resolver problemas o asuntos de trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 35, "q": "Me permiten asistir a capacitaciones relacionadas con mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 36, "q": "Recibo capacitación útil para hacer mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 37, "q": "Mi jefe ayuda a organizar mejor el trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 38, "q": "Mi jefe tiene en cuenta mis puntos de vista y opiniones", "s": [0, 1, 2, 3, 4]}, {"n": 39, "q": "Mi jefe me comunica a tiempo la información relacionada con el trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 40, "q": "La orientación que me da mi jefe me ayuda a realizar mejor mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 41, "q": "Mi jefe ayuda a solucionar los problemas que se presentan en el trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 42, "q": "Puedo confiar en mis compañeros de trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 43, "q": "Entre compañeros solucionamos los problemas de trabajo de forma respetuosa", "s": [0, 1, 2, 3, 4]}, {"n": 44, "q": "En mi trabajo me hacen sentir parte del grupo", "s": [0, 1, 2, 3, 4]}, {"n": 45, "q": "Cuando tenemos que realizar trabajo de equipo los compañeros colaboran", "s": [0, 1, 2, 3, 4]}, {"n": 46, "q": "Mis compañeros de trabajo me ayudan cuando tengo dificultades", "s": [0, 1, 2, 3, 4]}, {"n": 47, "q": "Me informan sobre lo que hago bien en mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 48, "q": "La forma como evalúan mi trabajo en mi centro de trabajo me ayuda a mejorar mi desempeño", "s": [0, 1, 2, 3, 4]}, {"n": 49, "q": "En mi centro de trabajo me pagan a tiempo mi salario", "s": [0, 1, 2, 3, 4]}, {"n": 50, "q": "El pago que recibo es el que merezco por el trabajo que realizo", "s": [0, 1, 2, 3, 4]}, {"n": 51, "q": "Si obtengo los resultados esperados en mi trabajo me recompensan o reconocen", "s": [0, 1, 2, 3, 4]}, {"n": 52, "q": "Las personas que hacen bien el trabajo pueden crecer laboralmente", "s": [0, 1, 2, 3, 4]}, {"n": 53, "q": "Considero que mi trabajo es estable", "s": [0, 1, 2, 3, 4]}, {"n": 54, "q": "En mi trabajo existe continua rotación de personal", "s": [4, 3, 2, 1, 0]}, {"n": 55, "q": "Siento orgullo de laborar en este centro de trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 56, "q": "Me siento comprometido con mi trabajo", "s": [0, 1, 2, 3, 4]}, {"n": 57, "q": "En mi trabajo puedo expresarme libremente sin interrupciones", "s": [0, 1, 2, 3, 4]}, {"n": 58, "q": "Recibo críticas constantes a mi persona y/o trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 59, "q": "Recibo burlas, calumnias, difamaciones, humillaciones o ridiculizaciones", "s": [4, 3, 2, 1, 0]}, {"n": 60, "q": "Se ignora mi presencia o se me excluye de las reuniones de trabajo y en la toma de decisiones", "s": [4, 3, 2, 1, 0]}, {"n": 61, "q": "Se manipulan las situaciones de trabajo para hacerme parecer un mal trabajador", "s": [4, 3, 2, 1, 0]}, {"n": 62, "q": "Se ignoran mis éxitos laborales y se atribuyen a otros trabajadores", "s": [4, 3, 2, 1, 0]}, {"n": 63, "q": "Me bloquean o impiden las oportunidades que tengo para obtener ascenso o mejora en mi trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 64, "q": "He presenciado actos de violencia en mi centro de trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 65, "q": "Atiendo clientes o usuarios muy enojados", "s": [4, 3, 2, 1, 0]}, {"n": 66, "q": "Mi trabajo me exige atender personas muy necesitadas de ayuda o enfermas", "s": [4, 3, 2, 1, 0]}, {"n": 67, "q": "Para hacer mi trabajo debo demostrar sentimientos distintos a los míos a clientes/usuarios", "s": [4, 3, 2, 1, 0]}, {"n": 68, "q": "Mi trabajo me exige atender situaciones de violencia", "s": [4, 3, 2, 1, 0]}, {"n": 69, "q": "Comunican tarde los asuntos de trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 70, "q": "Dificultan el logro de los resultados del trabajo", "s": [4, 3, 2, 1, 0]}, {"n": 71, "q": "Cooperan poco cuando se necesita", "s": [4, 3, 2, 1, 0]}, {"n": 72, "q": "Ignoran las sugerencias para mejorar su trabajo", "s": [4, 3, 2, 1, 0]}];
+var DOM=[{"name": "Condiciones en el ambiente de trabajo", "items": [1, 2, 3, 4, 5], "th": [5, 9, 11, 14]}, {"name": "Carga de trabajo", "items": [6, 12, 7, 8, 9, 10, 11, 65, 66, 67, 68, 13, 14, 15, 16], "th": [15, 21, 27, 37]}, {"name": "Falta de control sobre el trabajo", "items": [25, 26, 27, 28, 23, 24, 29, 30, 35, 36], "th": [11, 16, 21, 25]}, {"name": "Jornada de trabajo", "items": [17, 18], "th": [1, 2, 4, 6]}, {"name": "Interferencia en la relación trabajo-familia", "items": [19, 20, 21, 22], "th": [4, 6, 8, 10]}, {"name": "Liderazgo", "items": [31, 32, 33, 34, 37, 38, 39, 40, 41], "th": [9, 12, 16, 20]}, {"name": "Relaciones en el trabajo", "items": [42, 43, 44, 45, 46, 69, 70, 71, 72], "th": [10, 13, 17, 21]}, {"name": "Violencia", "items": [57, 58, 59, 60, 61, 62, 63, 64], "th": [7, 10, 13, 16]}, {"name": "Reconocimiento del desempeño", "items": [47, 48, 49, 50, 51, 52], "th": [6, 10, 14, 18]}, {"name": "Insuficiente sentido de pertenencia e inestabilidad", "items": [55, 56, 53, 54], "th": [4, 6, 8, 10]}];
+var CAT=[{"name": "Ambiente de trabajo", "doms": [0], "th": [5, 9, 11, 14]}, {"name": "Factores propios de la actividad", "doms": [1, 2], "th": [15, 30, 45, 60]}, {"name": "Organización del tiempo de trabajo", "doms": [3, 4], "th": [5, 7, 10, 13]}, {"name": "Liderazgo y relaciones en el trabajo", "doms": [5, 6, 7], "th": [14, 29, 42, 58]}, {"name": "Entorno organizacional", "doms": [8, 9], "th": [10, 14, 18, 23]}];
+var TOTAL_TH=[50,75,99,140];
+var COND={cliente:[65,66,67,68],jefe:[69,70,71,72]};
+</script>
+<script>/* ============================================================================
+   NOM-035 · núcleo de cálculo
+   Funciones puras: no tocan el DOM. Se testean en node y se inlinean en la app.
+   ==========================================================================*/
+const NIV = ['Muy alto', 'Alto', 'Medio', 'Bajo', 'Nulo'];
+
+function norm(s) {
+  return String(s == null ? '' : s)
+    .replace(/\u00a0/g, ' ')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/* similitud combinada: tokens (Jaccard) + caracteres (Dice sobre bigramas).
+   El máximo de las dos resuelve tanto reordenamientos como singular/plural. */
+function sim(a, b) {
+  const ta = new Set(a.split(' ')), tb = new Set(b.split(' '));
+  let inter = 0;
+  ta.forEach(t => { if (tb.has(t)) inter++; });
+  const jac = inter / (new Set([...ta, ...tb]).size || 1);
+  const bg = s => { const o = []; for (let i = 0; i < s.length - 1; i++) o.push(s.slice(i, i + 2)); return o; };
+  const A = bg(a), B = bg(b), used = new Array(B.length).fill(false);
+  let hit = 0;
+  for (const g of A) { const j = B.findIndex((x, k) => !used[k] && x === g); if (j >= 0) { used[j] = true; hit++; } }
+  const dice = (2 * hit) / ((A.length + B.length) || 1);
+  return Math.max(jac, dice);
+}
+
+function nivel(v, th) {
+  if (typeof v !== 'number' || isNaN(v)) return null;
+  if (v < th[0]) return 'Nulo';
+  if (v < th[1]) return 'Bajo';
+  if (v < th[2]) return 'Medio';
+  if (v < th[3]) return 'Alto';
+  return 'Muy alto';
+}
+
+/* ---------------------------------------------------------------- mapeo
+   Empareja los encabezados del export contra los 72 ítems por texto.
+   Devuelve el mapeo, los ítems ausentes y las columnas no reconocidas.     */
+function mapearGuiaIII(headers, umbral = 0.62) {
+  const H = headers.map(h => norm(h));
+  // el export de Humand prefija el enunciado agrupador en las sub-preguntas
+  const prefijos = H.filter(h => h.length > 60)
+    .map(h => h).filter(h => H.filter(x => x.startsWith(h.slice(0, 55))).length > 3);
+  const pref = prefijos.length ? prefijos[0].slice(0, 55) : null;
+
+  const libres = ITEMS.map(it => ({ n: it.n, q: norm(it.q) }));
+  const mapa = {};            // n de ítem -> índice de columna
+  const usadas = new Set();
+  const pares = [];
+  H.forEach((h, ci) => {
+    let t = h;
+    if (pref && t.startsWith(pref)) t = t.slice(pref.length).trim();
+    libres.forEach(it => { if (!(it.n in mapa)) pares.push({ ci, n: it.n, s: sim(t, it.q) }); });
+  });
+  pares.sort((a, b) => b.s - a.s);
+  for (const p of pares) {
+    if (p.s < umbral) break;
+    if (usadas.has(p.ci) || p.n in mapa) continue;
+    mapa[p.n] = p.ci; usadas.add(p.ci);
+  }
+  const faltantes = ITEMS.filter(it => !(it.n in mapa)).map(it => it.n);
+  const filtros = {};
+  H.forEach((h, ci) => {
+    if (usadas.has(ci)) return;
+    if (sim(h, norm('En mi trabajo debo brindar servicio a clientes o usuarios')) > 0.55) filtros.cliente = ci;
+    if (sim(h, norm('Soy jefe de otros trabajadores')) > 0.55) filtros.jefe = ci;
+  });
+  const meta = {};
+  H.forEach((h, ci) => {
+    if (usadas.has(ci)) return;
+    if (h === 'usuario' || h === 'id de usuario') meta.usuario = ci;
+    else if (h === 'fecha') meta.fecha = ci;
+    else if (h.includes('id de la respuesta')) meta.idRta = ci;
+    else if (h.includes('centro de trabajo') || h.includes('sucursal')) meta.sede = ci;
+    else if (h.includes('nombre')) meta.nombre = ci;
+  });
+  const sinUsar = H.map((h, ci) => ci).filter(ci => !usadas.has(ci)
+    && !Object.values(filtros).includes(ci) && !Object.values(meta).includes(ci));
+  return { mapa, faltantes, filtros, meta, sinUsar, prefijo: pref };
+}
+
+/* ---------------------------------------------------------------- puntaje */
+function puntuar(fila, m) {
+  const idx = {};                                   // ítem -> valor 0..4 o null
+  ITEMS.forEach(it => {
+    const ci = m.mapa[it.n];
+    if (ci === undefined) { idx[it.n] = null; return; }
+    const raw = norm(fila[ci]);
+    if (!raw) { idx[it.n] = null; return; }
+    const oi = OPTS.findIndex(o => norm(o) === raw);
+    idx[it.n] = oi < 0 ? null : it.s[oi];
+  });
+  const dom = {}, domNiv = {}, domFalt = {};
+  DOM.forEach(d => {
+    const vals = d.items.map(i => idx[i]).filter(v => v !== null);
+    domFalt[d.name] = d.items.filter(i => idx[i] === null);
+    dom[d.name] = vals.length ? vals.reduce((a, b) => a + b, 0) : null;
+    domNiv[d.name] = nivel(dom[d.name], d.th);
+  });
+  const cat = {}, catNiv = {};
+  CAT.forEach(c => {
+    const vals = c.doms.map(i => dom[DOM[i].name]).filter(v => v !== null);
+    cat[c.name] = vals.length ? vals.reduce((a, b) => a + b, 0) : null;
+    catNiv[c.name] = nivel(cat[c.name], c.th);
+  });
+  const tv = CAT.map(c => cat[c.name]).filter(v => v !== null);
+  const total = tv.length ? tv.reduce((a, b) => a + b, 0) : null;
+  const respondidos = ITEMS.filter(it => idx[it.n] !== null).length;
+  return { item: idx, dom, domNiv, domFalt, cat, catNiv, total,
+           totalNiv: nivel(total, TOTAL_TH), respondidos };
+}
+
+/* --------------------------------------------------------------- agregado */
+function agregar(sub) {
+  const dist = (get) => {
+    const d = {}; NIV.forEach(n => d[n] = 0);
+    sub.forEach(p => { const v = get(p); if (v) d[v]++; });
+    return d;
+  };
+  const prom = (get) => {
+    const v = sub.map(get).filter(x => typeof x === 'number');
+    return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length * 10) / 10 : null;
+  };
+  const out = { n: sub.length };
+  out.total = { prom: prom(p => p.total), dist: dist(p => p.totalNiv) };
+  out.total.nivel = nivel(out.total.prom, TOTAL_TH);
+  out.cat = {}; CAT.forEach(c => {
+    const pr = prom(p => p.cat[c.name]);
+    out.cat[c.name] = { prom: pr, nivel: nivel(pr, c.th), dist: dist(p => p.catNiv[c.name]) };
+  });
+  out.dom = {}; DOM.forEach(d => {
+    const pr = prom(p => p.dom[d.name]);
+    out.dom[d.name] = { prom: pr, nivel: nivel(pr, d.th), dist: dist(p => p.domNiv[d.name]) };
+  });
+  return out;
+}
+
+function cortar(gente, campo, minN = 3) {
+  const claves = [...new Set(gente.map(p => p[campo]).filter(v => v != null && v !== ''))].sort();
+  const out = {};
+  claves.forEach(k => {
+    const sub = gente.filter(p => p[campo] === k);
+    out[k] = Object.assign(agregar(sub), { reservado: sub.length < minN });
+  });
+  return out;
+}
+
+/* ----------------------------------------------------------------- Guía I */
+const G1_EVENTOS = ['Accidente que tenga como consecuencia la muerte, la pérdida de un miembro o una lesión grave',
+  'Asaltos', 'Actos violentos que derivaron en lesiones graves', 'Secuestros', 'Amenazas',
+  'Cualquier otro que ponga en riesgo su vida o salud, y/o la de otras personas'];
+const G1_SEC = {
+  II: ['¿Ha tenido recuerdos recurrentes sobre el acontecimiento que le afecten?',
+       '¿Ha tenido sueños de carácter recurrente sobre el acontecimiento?'],
+  III: ['¿Se ha esforzado por evitar todo tipo de sentimientos, conversaciones o situaciones que le puedan recordar el acontecimiento?',
+        '¿Se ha esforzado por evitar todo tipo de actividades, lugares o personas que motivan recuerdos del acontecimiento?',
+        '¿Ha tenido dificultad para recordar alguna parte importante del evento?',
+        '¿Ha disminuido su interés en sus actividades cotidianas?',
+        '¿Se ha sentido usted alejado o distante de los demás?',
+        '¿Ha notado que tiene dificultad para expresar sus sentimientos?',
+        '¿Ha tenido la impresión de que su vida se va a acortar, que va a morir próximamente o que tiene un futuro limitado?'],
+  IV: ['¿Ha tenido usted dificultades para dormir?',
+       '¿Ha estado particularmente irritable o le han dado arranques de coraje?',
+       '¿Ha tenido dificultad para concentrarse?',
+       '¿Ha estado nervioso o constantemente en alerta?',
+       '¿Se ha sobresaltado fácilmente por cualquier cosa?']
+};
+
+function mapearGuiaI(headers, umbral = 0.6) {
+  const H = headers.map(norm);
+  const pref = norm('¿Ha presenciado o sufrido alguna vez, durante o con motivo del trabajo un acontecimiento como los siguientes:');
+  const buscar = (txt) => {
+    const t = norm(txt); let best = -1, bs = 0;
+    H.forEach((h, ci) => {
+      let x = h; if (x.startsWith(pref)) x = x.slice(pref.length).trim();
+      const s = sim(x, t); if (s > bs) { bs = s; best = ci; }
+    });
+    return bs >= umbral ? best : null;
+  };
+  const ev = G1_EVENTOS.map(buscar);
+  const sec = {}; Object.keys(G1_SEC).forEach(k => sec[k] = G1_SEC[k].map(buscar));
+  const meta = {};
+  H.forEach((h, ci) => {
+    if (h === 'usuario') meta.usuario = ci;
+    else if (h === 'fecha') meta.fecha = ci;
+    else if (h.includes('id de la respuesta')) meta.idRta = ci;
+  });
+  const faltan = [];
+  ev.forEach((c, i) => { if (c === null) faltan.push('Acontecimiento: ' + G1_EVENTOS[i]); });
+  Object.keys(sec).forEach(k => sec[k].forEach((c, i) => {
+    if (c === null) faltan.push('Sección ' + k + ': ' + G1_SEC[k][i]);
+  }));
+  return { ev, sec, meta, faltan };
+}
+
+function evaluarGuiaI(fila, m) {
+  const si = ci => ci !== null && ['si', 'si '].includes(norm(fila[ci])) || (ci !== null && norm(fila[ci]) === 'si');
+  const evSi = m.ev.filter(ci => si(ci)).length;
+  const cuenta = k => m.sec[k].filter(ci => si(ci)).length;
+  const r = { acontecimiento: evSi > 0, sII: cuenta('II'), sIII: cuenta('III'), sIV: cuenta('IV') };
+  if (!r.acontecimiento) {
+    r.secI = 'NO REQUIERE ATENCION'; r.eval = 'NO REQUIERE ATENCION'; r.aplica = false;
+  } else {
+    r.aplica = true;
+    r.secI = 'REQUIERE COMPLETAR';
+    r.secII = r.sII === 2 ? 'REQUIERE ATENCION' : 'NO REQUIERE ATENCION';
+    r.secIII = r.sIII >= 3 ? 'REQUIERE ATENCION' : 'NO REQUIERE ATENCION';
+    r.secIV = r.sIV >= 2 ? 'REQUIERE ATENCION' : 'NO REQUIERE ATENCION';
+    r.eval = [r.secII, r.secIII, r.secIV].includes('REQUIERE ATENCION')
+      ? 'REQUIERE ATENCION' : 'NO REQUIERE ATENCION';
+  }
+  return r;
+}
+
+/* ------------------------------------------------------- tramos y utilidades */
+function tramoAntiguedad(ingreso, corte) {
+  if (!ingreso) return null;
+  const a = (corte - ingreso) / (365.25 * 24 * 3600 * 1000);
+  if (a < 0) return null;
+  if (a < 1) return 'Menos de 1 año';
+  if (a < 5) return '1 a 4 años';
+  if (a < 10) return '5 a 9 años';
+  if (a < 15) return '10 a 14 años';
+  if (a < 20) return '15 a 19 años';
+  if (a < 25) return '20 a 24 años';
+  return '25 años o más';
+}
+const TRAMOS = ['Menos de 1 año', '1 a 4 años', '5 a 9 años', '10 a 14 años',
+                '15 a 19 años', '20 a 24 años', '25 años o más'];
+
+</script>
+<script>/* ============================================================================
+   NOM-035 · capa de aplicación (UI, render y exportación)
+   ==========================================================================*/
+const S = {
+  files: {}, hist: [], gente: [], ets: null, g: null, m3: null, m1: null,
+  padron: null, padCols: [], cuts: [], activeCuts: [], diag: {},
+  opts: { genero: false, reservar: true, empresa: '' }, minN: 3
+};
+const LVCSS = { 'Muy alto': 'muyalto', 'Alto': 'alto', 'Medio': 'medio', 'Bajo': 'bajo', 'Nulo': 'nulo' };
+const LVHEX = { 'Muy alto': 'C00000', 'Alto': 'D97706', 'Medio': 'EAB308', 'Bajo': '5C9E45', 'Nulo': '7EB4D6' };
+const LVFG = { 'Muy alto': 'FFFFFF', 'Alto': 'FFFFFF', 'Medio': '1B3A5C', 'Bajo': 'FFFFFF', 'Nulo': '1B3A5C' };
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const chip = l => l ? `<span class="chip ${['Medio','Nulo'].includes(l)?'d':''}" style="background:var(--${LVCSS[l]})">${l}</span>` : '<span class="rsv">—</span>';
+const fmt = v => v === null || v === undefined ? '—' : (Math.round(v * 10) / 10);
+
+/* ------------------------------------------------------------ lectura xlsx */
+function leerArchivo(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error('No se pudo leer ' + file.name));
+    fr.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null, raw: true });
+        const nz = rows.filter(r => r && r.some(c => c !== null && c !== ''));
+        if (nz.length < 2) throw new Error('La hoja no tiene filas de datos');
+        res(nz);
+      } catch (err) { rej(err); }
+    };
+    fr.readAsArrayBuffer(file);
+  });
+}
+
+/* ------------------------------------------------------- género heurístico
+   Listas explícitas primero; después sólo las terminaciones fuertes del
+   español. Si no alcanza, devuelve null y la persona cae en «Sin determinar»
+   en lugar de ser adivinada. */
+const G_F = new Set(('guadalupe concepcion soledad trinidad rosario pilar carmen dolores mercedes '
+ + 'beatriz isabel raquel ester esther ruth judith abigail noemi nohemi itzel xochitl yaretzi '
+ + 'maribel estefania jazmin miriam jacqueline rocio ines nieves remedios lourdes anahi nayeli '
+ + 'yamilet lizbeth maricruz mayte irene marisol araceli yaneth yazmin ivonne yvonne evelyn '
+ + 'karen sherlyn ashley jocelyn madelyn caroline nicole denise michelle jennifer jessica '
+ + 'kimberly heidi ingrid astrid mitzi dulce fatima esperanza asuncion encarnacion inmaculada '
+ + 'consuelo amparo milagros veronica raquel abril nohely aime aime yuridia anais mariel '
+ + 'lucero flor luz cruz paz belen carmen consuelo').split(' '));
+const G_M = new Set(('jose luca elias tobias matias nicolas tomas lucas andres jesus isaias '
+ + 'josue noe ignacio dario cosme jaime rene felipe enrique miguel manuel gabriel daniel '
+ + 'israel ismael rafael angel joel abel fidel ariel emmanuel javier oliver walter victor '
+ + 'nestor hector salvador amador martin agustin joaquin benjamin efrain german adrian '
+ + 'cristian fabian julian sebastian bruno arturo alberto roberto ricardo eduardo fernando '
+ + 'armando gerardo leonardo alejandro alfredo wilfrido luis carlos marcos ramos santos '
+ + 'jorge felix alexis dennis kevin edwin erwin brayan jonathan nathan ivan esteban '
+ + 'gilberto heriberto humberto norberto gustavo octavio silvestre aristeo').split(' '));
+function generoDeNombre(nombre) {
+  if (!nombre) return null;
+  const partes = norm(nombre).split(' ').filter(p => p.length > 2);
+  for (const p of partes) {
+    if (G_F.has(p)) return 'Femenino';
+    if (G_M.has(p)) return 'Masculino';
+  }
+  for (const p of partes) {                 // sólo terminaciones inequívocas
+    if (p.endsWith('a')) return 'Femenino';
+    if (p.endsWith('o')) return 'Masculino';
+  }
+  return null;                              // no se adivina
+}
+
+/* --------------------------------------------------------------- dropzones */
+function zona(sel, key, multi) {
+  const el = $(sel), inp = el.querySelector('input');
+  ['dragover', 'dragenter'].forEach(e => el.addEventListener(e, ev => {
+    ev.preventDefault(); el.classList.add('over');
+  }));
+  ['dragleave', 'drop'].forEach(e => el.addEventListener(e, () => el.classList.remove('over')));
+  el.addEventListener('drop', ev => {
+    ev.preventDefault();
+    if (ev.dataTransfer.files.length) recibir(el, key, [...ev.dataTransfer.files], multi);
+  });
+  inp.addEventListener('change', () => {
+    if (inp.files.length) recibir(el, key, [...inp.files], multi);
+  });
+}
+async function recibir(el, key, files, multi) {
+  try {
+    if (multi) {
+      for (const f of files) S.hist.push({ file: f, rows: await leerArchivo(f), anio: '' });
+      pintarHist();
+    } else {
+      const rows = await leerArchivo(files[0]);
+      S.files[key] = { name: files[0].name, rows };
+      el.classList.add('done');
+      el.querySelector('.badge').className = 'badge ok';
+      el.querySelector('.badge').textContent = 'Cargado';
+      el.querySelector('.fname').textContent = files[0].name + ' · ' + (rows.length - 1) + ' filas';
+    }
+    revisar();
+  } catch (err) { alert('Error leyendo el archivo: ' + err.message); }
+}
+function pintarHist() {
+  $('#hist-list').innerHTML = S.hist.map((h, i) => `
+    <div class="row" style="justify-content:space-between;border:1px solid var(--line);
+         border-radius:8px;padding:9px 12px">
+      <span style="font-size:13px">${esc(h.file.name)} <span class="hint">· ${h.rows.length - 1} filas</span></span>
+      <span class="row" style="gap:8px">Año <input class="yr" value="${esc(h.anio)}" data-h="${i}" placeholder="2023">
+      <button class="btn sec" style="padding:6px 11px" data-del="${i}">Quitar</button></span>
+    </div>`).join('');
+  $$('#hist-list [data-h]').forEach(i => i.addEventListener('input', e => {
+    S.hist[+e.target.dataset.h].anio = e.target.value.trim();
+  }));
+  $$('#hist-list [data-del]').forEach(b => b.addEventListener('click', e => {
+    S.hist.splice(+e.target.dataset.del, 1); pintarHist();
+  }));
+}
+function revisar() {
+  const ok = !!S.files.g3;
+  $('#go').disabled = !ok;
+  $('#go-hint').textContent = ok
+    ? 'Listo. El cálculo corre localmente, no se envía nada.'
+    : 'Cargá al menos el export de Guía III.';
+}
+zona('#d-g3', 'g3'); zona('#d-g1', 'g1'); zona('#d-pad', 'pad'); zona('#d-hist', null, true);
+
+['#t-gen', '#t-rsv'].forEach(s => {
+  const el = $(s), inp = el.querySelector('input');
+  inp.addEventListener('change', () => {
+    el.classList.toggle('on', inp.checked);
+    S.opts.genero = $('#t-gen input').checked;
+    S.opts.reservar = $('#t-rsv input').checked;
+    S.minN = S.opts.reservar ? 3 : 0;
+    $('#opt-hint').innerHTML = S.opts.genero
+      ? 'El género inferido del nombre es una <b>estimación</b>, no un dato declarado por la persona. Queda rotulado como tal en el reporte. Para un reporte de cumplimiento, agregá la pregunta al cuestionario o la columna al padrón.'
+      : (S.opts.reservar ? '' : 'Con la reserva desactivada se muestran segmentos de una o dos personas. En esos casos el resultado del segmento <b>es</b> la evaluación individual de esa persona.');
+  });
+});
+$('#f-emp').addEventListener('input', e => S.opts.empresa = e.target.value.trim());
+
+/* -------------------------------------------------------------- navegación */
+function ir(p) {
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.p === p));
+  $$('.panel').forEach(x => x.classList.toggle('on', x.id === 'p-' + p));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$$('.tab').forEach(t => t.addEventListener('click', () => { if (!t.disabled) ir(t.dataset.p); }));
+
+/* ---------------------------------------------------------------- proceso */
+$('#go').addEventListener('click', () => {
+  try { procesar(); } catch (err) { alert('Error procesando: ' + err.message); console.error(err); }
+});
+
+function armarPadron(rows) {
+  const H = rows[0].map(h => norm(h));
+  const find = (...ks) => H.findIndex(h => ks.some(k => h.includes(k)));
+  const ci = {
+    usuario: H.findIndex(h => h === 'usuario' || h.includes('numero de empleado') || h.includes('legajo')),
+    nombre: find('nombre'),
+    ingreso: find('fecha de contratacion', 'fecha de ingreso', 'antiguedad'),
+    genero: H.findIndex(h => h === 'genero' || h === 'sexo'),
+  };
+  if (ci.usuario < 0) throw new Error('El padrón no tiene una columna de número de empleado (Usuario / Legajo).');
+  const VETO = ['telefono', 'celular', 'email', 'correo', 'fecha', 'razon', 'observacion',
+    'direccion', 'domicilio', 'curp', 'rfc', 'nss', 'imss', 'salario', 'sueldo', 'cuenta',
+    'clabe', 'id de', 'usuario'];
+  const extra = rows[0].map((h, i) => ({ h, i })).filter(x => x.h &&
+    ![ci.usuario, ci.nombre, ci.ingreso, ci.genero].includes(x.i) &&
+    !VETO.some(k => norm(x.h).includes(k)));
+  const map = {};
+  rows.slice(1).forEach(r => {
+    const k = r[ci.usuario]; if (k === null || k === '') return;
+    const o = { nombre: ci.nombre >= 0 ? r[ci.nombre] : null,
+      ingreso: ci.ingreso >= 0 && r[ci.ingreso] instanceof Date ? r[ci.ingreso] : null,
+      genero: ci.genero >= 0 ? r[ci.genero] : null, extra: {} };
+    extra.forEach(x => o.extra[x.h] = r[x.i]);
+    map[String(k).trim()] = o;
+  });
+  return { map, cols: extra.map(x => x.h), tieneGenero: ci.genero >= 0, tieneIngreso: ci.ingreso >= 0 };
+}
+
+function procesar() {
+  const rows = S.files.g3.rows;
+  const m3 = mapearGuiaIII(rows[0]); S.m3 = m3;
+  if (Object.keys(m3.mapa).length < 40)
+    throw new Error('Sólo se reconocieron ' + Object.keys(m3.mapa).length +
+      ' de 72 ítems. ¿Es el export de la Guía III?');
+  if (m3.meta.usuario === undefined) m3.meta.usuario = 0;
+
+  S.padron = S.files.pad ? armarPadron(S.files.pad.rows) : null;
+  const corte = new Date();
+  let cruzados = 0, sinCruce = [];
+
+  S.gente = rows.slice(1).filter(r => r[m3.meta.usuario] !== null && r[m3.meta.usuario] !== '')
+    .map(r => {
+      const us = String(r[m3.meta.usuario]).trim();
+      const p = puntuar(r, m3);
+      p.usuario = us;
+      p.fecha = m3.meta.fecha !== undefined ? r[m3.meta.fecha] : null;
+      p.sede = m3.meta.sede !== undefined ? r[m3.meta.sede] : null;
+      p.esJefe = m3.filtros.jefe !== undefined ? norm(r[m3.filtros.jefe]).startsWith('si') : null;
+      const meta = S.padron ? S.padron.map[us] : null;
+      if (meta) { cruzados++; } else if (S.padron) { sinCruce.push(us); }
+      p.nombre = meta ? meta.nombre : null;
+      p.antiguedad = meta ? tramoAntiguedad(meta.ingreso, corte) : null;
+      p.genero = meta && meta.genero ? String(meta.genero).trim()
+        : (S.opts.genero ? generoDeNombre(meta ? meta.nombre : null) : null);
+      if (meta) Object.keys(meta.extra).forEach(k => p['x_' + k] = meta.extra[k]);
+      return p;
+    });
+  if (!S.gente.length) throw new Error('No se encontraron respuestas con número de empleado.');
+  S.g = agregar(S.gente);
+
+  /* ------- Guía I */
+  S.ets = null;
+  if (S.files.g1) {
+    const r1 = S.files.g1.rows, m1 = mapearGuiaI(r1[0]); S.m1 = m1;
+    if (m1.meta.usuario === undefined) m1.meta.usuario = 0;
+    const lst = r1.slice(1).filter(r => r[m1.meta.usuario] !== null && r[m1.meta.usuario] !== '')
+      .map(r => {
+        const e = evaluarGuiaI(r, m1); e.usuario = String(r[m1.meta.usuario]).trim();
+        const meta = S.padron ? S.padron.map[e.usuario] : null;
+        e.area = meta && meta.extra ? (meta.extra['Área'] || meta.extra['Area'] || null) : null;
+        return e;
+      });
+    S.ets = { lst, req: lst.filter(e => e.eval === 'REQUIERE ATENCION').length,
+      acont: lst.filter(e => e.acontecimiento).length,
+      señal: lst.filter(e => !e.acontecimiento && (e.sIII >= 3 || e.sIV >= 2)).length };
+  }
+
+  /* ------- cortes disponibles */
+  S.cuts = [];
+  const hay = f => S.gente.some(p => p[f] !== null && p[f] !== undefined && p[f] !== '');
+  const util = f => {                       // descarta identificadores disfrazados de segmento
+    const v = new Set(S.gente.map(p => p[f]).filter(x => x !== null && x !== undefined && x !== ''));
+    return v.size >= 2 && v.size <= Math.max(2, Math.min(25, Math.ceil(S.gente.length * 0.6)));
+  };
+  const esArea = h => ['area', 'departamento', 'puesto', 'sede', 'sucursal', 'centro', 'planta',
+    'segmenta', 'division', 'gerencia', 'turno'].some(k => norm(h).includes(k));
+  const extras = (S.padron ? (S.padron.cols || []) : []).filter(c => hay('x_' + c) && util('x_' + c));
+  extras.filter(esArea).forEach(c => S.cuts.push({ k: 'x_' + c, label: c, pref: true }));
+  if (hay('antiguedad') && util('antiguedad')) S.cuts.push({ k: 'antiguedad', label: 'Antigüedad', orden: TRAMOS, pref: true });
+  if (hay('genero') && util('genero')) S.cuts.push({ k: 'genero', pref: true,
+    label: 'Género' + (S.padron && S.padron.tieneGenero ? '' : ' (inferido)') });
+  if (hay('sede') && util('sede')) S.cuts.push({ k: 'sede', label: 'Centro de trabajo (del cuestionario)', pref: true });
+  extras.filter(c => !esArea(c)).forEach(c => S.cuts.push({ k: 'x_' + c, label: c }));
+  S.activeCuts = S.cuts.filter(c => c.pref).map(c => c.k);
+  if (!S.activeCuts.length) S.activeCuts = S.cuts.slice(0, 2).map(c => c.k);
+
+  /* ------- histórico */
+  S.histCalc = S.hist.filter(h => h.anio).map(h => {
+    const m = mapearGuiaIII(h.rows[0]);
+    if (m.meta.usuario === undefined) m.meta.usuario = 0;
+    const gs = h.rows.slice(1).filter(r => r.some(c => c !== null && c !== ''))
+      .map(r => puntuar(r, m));
+    return { anio: h.anio, n: gs.length, ag: agregar(gs),
+      mapeados: Object.keys(m.mapa).length, faltantes: m.faltantes };
+  }).sort((a, b) => String(a.anio).localeCompare(String(b.anio)));
+
+  S.diag = { cruzados, sinCruce };
+  renderDiag(); renderRes(); renderCortes(); renderHist();
+  $$('.tab').forEach(t => t.disabled = false);
+  if (!S.histCalc.length) $('.tab[data-p=hist]').disabled = false;
+  ir('diag');
+}
+
+/* ================================================================= DIAG */
+function renderDiag() {
+  const m3 = S.m3, tot = ITEMS.length, ok = Object.keys(m3.mapa).length;
+  const cov = S.gente.reduce((a, p) => a + p.respondidos, 0) / (S.gente.length * tot) * 100;
+  $('#diag-stats').innerHTML = [
+    ['Respuestas', S.gente.length, 'Guía III' + (S.ets ? ' · ' + S.ets.lst.length + ' en Guía I' : '')],
+    ['Ítems reconocidos', ok + ' / ' + tot, ok === tot ? 'El cuestionario está completo' : (tot - ok) + ' sin mapear'],
+    ['Cobertura de respuesta', cov.toFixed(0) + '%', 'ítems efectivamente contestados'],
+    ['Cruce con padrón', S.padron ? S.diag.cruzados + ' / ' + S.gente.length : '—',
+      S.padron ? 'por número de empleado' : 'sin padrón cargado']
+  ].map(s => `<div class="card stat"><div class="k">${s[0]}</div>
+      <div class="v" style="color:var(--navy)">${s[1]}</div><div class="n">${esc(s[2])}</div></div>`).join('');
+
+  const lin = (est, t, s) => `<div class="diag"><div class="dot" style="background:var(--${est})">${
+    est === 'ok' ? '✓' : est === 'warn' ? '!' : '×'}</div><div class="tx"><b>${t}</b>${
+    s ? '<br><span>' + s + '</span>' : ''}</div></div>`;
+  let h = '';
+  h += lin(ok === tot ? 'ok' : 'warn', ok + ' de ' + tot + ' ítems emparejados por texto de pregunta',
+    'El emparejamiento es semántico, así que tolera que el export traiga las preguntas en otro orden.');
+  if (m3.faltantes.length) {
+    h += lin('bad', 'Faltan ' + m3.faltantes.length + ' ítem(s) en el cuestionario: ' + m3.faltantes.join(', '),
+      m3.faltantes.map(n => n + '. ' + esc(ITEMS.find(i => i.n === n).q)).join('<br>') +
+      '<br><br>Los dominios que los contienen quedan subestimados y la calificación final se calcula sobre ' +
+      ok + ' de ' + tot + ' ítems.');
+  }
+  const cond = [];
+  if (m3.filtros.cliente !== undefined) cond.push('atención a clientes (ítems 65-68)');
+  if (m3.filtros.jefe !== undefined) cond.push('jefatura (ítems 69-72)');
+  h += lin(cond.length === 2 ? 'ok' : 'warn',
+    cond.length ? 'Preguntas filtro detectadas: ' + cond.join(' y ') : 'No se detectaron las preguntas filtro',
+    'Los ítems condicionales se excluyen del puntaje de quien no aplica, en lugar de contarse como cero.');
+  if (m3.sinUsar.length) h += lin('warn', m3.sinUsar.length + ' columna(s) no utilizada(s)',
+    m3.sinUsar.map(i => esc(String(S.files.g3.rows[0][i]).slice(0, 90))).join('<br>'));
+  $('#diag-map').innerHTML = h;
+
+  let p = '';
+  if (!S.padron) {
+    p = lin('warn', 'Sin padrón cargado', 'Sin él no hay cortes por área, antigüedad ni género. Se puede cargar y volver a procesar.');
+  } else {
+    p += lin(S.diag.sinCruce.length ? 'warn' : 'ok',
+      S.diag.cruzados + ' de ' + S.gente.length + ' respuestas cruzaron con el padrón',
+      S.diag.sinCruce.length ? 'Sin coincidencia: ' + S.diag.sinCruce.slice(0, 12).join(', ') +
+        (S.diag.sinCruce.length > 12 ? ' y ' + (S.diag.sinCruce.length - 12) + ' más' : '') : '');
+    p += lin(S.padron.tieneIngreso ? 'ok' : 'warn',
+      S.padron.tieneIngreso ? 'Fecha de contratación disponible' : 'Sin fecha de contratación',
+      S.padron.tieneIngreso ? 'La antigüedad se calcula al día de hoy.' : 'No se puede segmentar por antigüedad.');
+    p += lin(S.padron.tieneGenero ? 'ok' : (S.opts.genero ? 'warn' : 'bad'),
+      S.padron.tieneGenero ? 'Género declarado en el padrón'
+        : (S.opts.genero ? 'Género inferido del nombre de pila' : 'Género no disponible'),
+      S.padron.tieneGenero ? '' : (S.opts.genero
+        ? 'Es una estimación. Va rotulada como inferencia en todo el reporte; no la uses para un reporte de cumplimiento.'
+        : 'Agregá la columna al padrón o la pregunta al cuestionario.'));
+    p += lin('ok', 'Columnas ofrecidas como segmentación',
+      (S.padron.cols || []).map(esc).join(' · ') || 'ninguna');
+  }
+  $('#diag-pad').innerHTML = p;
+
+  const notas = [];
+  const cobPad = S.padron ? S.gente.length / Object.keys(S.padron.map).length * 100 : null;
+  if (cobPad !== null && cobPad < 60) notas.push(['w',
+    '<b>Participación baja.</b> ' + S.gente.length + ' respuestas sobre ' +
+    Object.keys(S.padron.map).length + ' personas del padrón (' + cobPad.toFixed(0) +
+    '%). La norma pide aplicar el instrumento a todo el personal o a una muestra representativa; con esta cobertura el resultado no describe al centro de trabajo.']);
+  const chicos = [];
+  S.cuts.forEach(c => {
+    const d = cortar(S.gente, c.k, S.minN);
+    Object.entries(d).forEach(([k, v]) => { if (v.n < 3) chicos.push(c.label + ' › ' + k + ' (n=' + v.n + ')'); });
+  });
+  if (chicos.length) notas.push([S.opts.reservar ? '' : 'e',
+    '<b>' + chicos.length + ' segmento(s) con menos de 3 personas.</b> ' +
+    (S.opts.reservar ? 'Quedan reservados: ' : 'Se están mostrando aunque revelan resultados individuales: ') +
+    chicos.slice(0, 8).join(' · ') + (chicos.length > 8 ? ' …' : '')]);
+  if (S.ets && S.ets.señal) notas.push(['w',
+    '<b>Guía I:</b> ' + S.ets.señal + ' persona(s) marcaron síntomas de las Secciones III o IV sin haber reportado acontecimiento. Por la lógica del instrumento no disparan nada y así debe quedar en el registro, pero conviene pasarlo a salud ocupacional por otra vía.']);
+  $('#diag-notes').innerHTML = notas.map(n =>
+    `<div class="note ${n[0]}" style="margin-bottom:10px">${n[1]}</div>`).join('') +
+    `<div class="row" style="margin-top:6px"><button class="btn" onclick="ir('res')">Ver resultados</button></div>`;
+}
+
+/* ============================================================== RESULTADOS */
+function tablaScores(defs, ag, sub) {
+  const rows = defs.map(d => {
+    const x = ag[d.name], dist = x.dist;
+    return `<tr><td>${esc(d.name)}</td><td class="num">${fmt(x.prom)}</td>
+      <td class="mid">${chip(x.nivel)}</td><td class="mid"><span class="cnt">${
+      NIV.map(n => `<i${dist[n] ? ` style="background:var(--${LVCSS[n]});color:${
+        ['Medio','Nulo'].includes(n)?'#1B3A5C':'#fff'};border-color:transparent"` : ''}>${dist[n]}</i>`).join('')
+      }</span></td></tr>`;
+  }).join('');
+  return `<table><thead><tr><th>Dimensión</th><th style="text-align:right">Prom.</th>
+    <th class="mid">Nivel del grupo</th><th class="mid">Muy alto · Alto · Medio · Bajo · Nulo</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderRes() {
+  const g = S.g, nv = g.total.nivel;
+  $('#res-top').innerHTML = `
+    <div class="card big" style="background:var(--${LVCSS[nv]})">
+      <div class="k">Nivel de riesgo del centro de trabajo</div>
+      <div class="v">${nv}</div>
+      <div style="font-size:13.5px;font-weight:650;margin-top:8px">Calificación final del grupo: ${fmt(g.total.prom)} puntos</div>
+      <div style="font-size:12px;margin-top:12px;opacity:.8">${S.gente.length} respuestas${
+        S.m3.faltantes.length ? ' · sobre ' + (72 - S.m3.faltantes.length) + ' de 72 ítems' : ''}</div>
+    </div>
+    <div class="card pad">
+      <div class="sect">Distribución individual de los ${S.gente.length} colaboradores</div>
+      ${NIV.map(n => { const v = g.total.dist[n], pc = v / S.gente.length * 100;
+        return `<div class="row" style="gap:12px;margin-bottom:9px">
+          <span style="width:74px;font-size:13px;${v?'font-weight:600':'color:var(--muted)'}">${n}</span>
+          <span class="bar" style="flex:1">${v?`<i style="width:${pc}%;background:var(--${LVCSS[n]})"></i>`:''}</span>
+          <span style="width:26px;text-align:right;font-weight:650;font-size:13px;${
+            v?'':'color:var(--line)'}">${v}</span></div>`; }).join('')}
+      <div class="hint" style="margin-top:12px">Umbrales de la calificación final: Nulo &lt;50 · Bajo 50-74.9 · Medio 75-98.9 · Alto 99-139.9 · Muy alto ≥140.</div>
+    </div>`;
+  $('#res-cat').innerHTML = tablaScores(CAT, g.cat);
+  $('#res-dom').innerHTML = tablaScores(DOM, g.dom);
+
+  const focos = DOM.map(d => ({ d, x: g.dom[d.name],
+    alt: g.dom[d.name].dist['Muy alto'] + g.dom[d.name].dist['Alto'] + g.dom[d.name].dist['Medio'] }))
+    .filter(f => f.alt > 0).sort((a, b) => b.alt - a.alt);
+  $('#res-foco').innerHTML = !focos.length ? '' : `
+    <div class="card pad"><div class="sect">Dónde está el riesgo, en realidad</div>
+    <p class="hint" style="margin:-4px 0 16px">El promedio del grupo puede quedar en Nulo mientras algunas personas están en Medio o más. Estos son los dominios con casos individuales elevados.</p>
+    <div class="grid g${Math.min(focos.length, 3)}">${focos.slice(0, 3).map(f => `
+      <div style="border:1px solid var(--line);border-radius:9px;padding:16px">
+        <div style="font-weight:650;font-size:15px;color:var(--navy)">${esc(f.d.name)}</div>
+        <div style="font-size:32px;font-weight:750;color:var(--alto);margin:8px 0 2px">${f.alt} de ${S.gente.length}</div>
+        <div class="hint">en Medio o superior · promedio del grupo ${fmt(f.x.prom)} (${f.x.nivel})</div>
+      </div>`).join('')}</div></div>`;
+
+  $('#res-g1').innerHTML = !S.ets ? '' : `
+    <div class="card pad"><div class="sect">Guía I — Acontecimientos traumáticos severos</div>
+    <div class="grid g4">${[
+      ['Respuestas', S.ets.lst.length], ['Reportaron acontecimiento', S.ets.acont],
+      ['Requieren atención clínica', S.ets.req],
+      ['Síntomas sin acontecimiento', S.ets.señal]
+    ].map((s, i) => `<div class="card stat" style="box-shadow:none">
+      <div class="k">${s[0]}</div><div class="v" style="color:${
+        i === 2 && s[1] > 0 ? 'var(--bad)' : i === 3 && s[1] > 0 ? 'var(--alto)' : 'var(--navy)'}">${s[1]}</div></div>`).join('')}
+    </div>${S.ets.señal ? `<div class="note w" style="margin-top:14px">${S.ets.señal} persona(s) marcaron síntomas de las Secciones III o IV sin reportar acontecimiento en la Sección I. El instrumento corta ahí y no las cuenta, lo cual es correcto — pero es una señal que vale derivar por otra vía.</div>` : ''}</div>`;
+}
+
+/* ================================================================= CORTES */
+function renderCortes() {
+  $('#cut-picker').innerHTML = S.cuts.length
+    ? S.cuts.map(c => `<label class="tog ${S.activeCuts.includes(c.k) ? 'on' : ''}">
+        <input type="checkbox" data-c="${esc(c.k)}" ${S.activeCuts.includes(c.k) ? 'checked' : ''}>
+        ${esc(c.label)}</label>`).join('')
+    : '<span class="hint">No hay columnas para segmentar. Cargá un padrón de usuarios con área, fecha de contratación u otras columnas.</span>';
+  $$('#cut-picker input').forEach(i => i.addEventListener('change', e => {
+    const k = e.target.dataset.c;
+    S.activeCuts = e.target.checked ? [...S.activeCuts, k] : S.activeCuts.filter(x => x !== k);
+    renderCortes();
+  }));
+  $('#cut-out').innerHTML = S.activeCuts.map(k => {
+    const c = S.cuts.find(x => x.k === k); if (!c) return '';
+    const d = cortar(S.gente, k, S.minN);
+    let claves = Object.keys(d);
+    if (c.orden) claves = c.orden.filter(x => claves.includes(x)).concat(claves.filter(x => !c.orden.includes(x)));
+    const filas = claves.map(v => {
+      const x = d[v];
+      if (x.reservado) return `<tr><td><b>${esc(v)}</b></td><td class="num">${x.n}</td>
+        <td colspan="3" class="rsv">Resultado reservado — menos de 3 personas en el segmento</td></tr>`;
+      const fuera = CAT.filter(cc => x.cat[cc.name].nivel && x.cat[cc.name].nivel !== 'Nulo')
+        .map(cc => esc(cc.name) + ' (' + x.cat[cc.name].nivel + ')');
+      return `<tr><td><b>${esc(v)}</b></td><td class="num">${x.n}</td>
+        <td class="num">${fmt(x.total.prom)}</td><td class="mid">${chip(x.total.nivel)}</td>
+        <td style="font-size:12.5px">${fuera.length ? fuera.join(' · ') : '<span class="rsv">Ninguna</span>'}</td></tr>`;
+    }).join('');
+    return `<div class="card pad" style="margin-bottom:16px">
+      <div class="sect">${esc(c.label)}</div>
+      <table><thead><tr><th>Segmento</th><th style="text-align:right">n</th>
+        <th style="text-align:right">Prom. total</th><th class="mid">Nivel</th>
+        <th>Categorías fuera de «Nulo»</th></tr></thead><tbody>${filas}</tbody></table></div>`;
+  }).join('') || '<div class="empty">Elegí al menos una segmentación.</div>';
+}
+
+/* ============================================================ COMPARATIVO */
+function renderHist() {
+  const H = S.histCalc || [];
+  if (!H.length) {
+    $('#hist-out').innerHTML = `<div class="card pad"><div class="empty">
+      Todavía no hay mediciones anteriores cargadas.<br>
+      <span class="hint">Volvé al paso 1, subí los export de Guía III de otros años y asignale el año a cada uno.
+      El comparativo se arma por dominio, como la lámina de evolución del reporte.</span>
+      <div style="margin-top:16px"><button class="btn sec" onclick="ir('carga')">Ir a cargar datos</button></div>
+      </div></div>`;
+    return;
+  }
+  const cols = H.concat([{ anio: 'Actual', n: S.gente.length, ag: S.g, mapeados: 72 - S.m3.faltantes.length }]);
+  $('#hist-out').innerHTML = `<div class="card pad">
+    <div class="sect">Evolución por dominio</div>
+    <table><thead><tr><th>Dominio</th>${cols.map(c =>
+      `<th class="mid">${esc(c.anio)}<br><span style="font-weight:400;text-transform:none;letter-spacing:0">n=${c.n}</span></th>`).join('')}
+      <th class="mid">Tendencia</th></tr></thead><tbody>
+    ${DOM.map(d => {
+      const ns = cols.map(c => c.ag.dom[d.name].nivel);
+      const iv = n => NIV.length - 1 - NIV.indexOf(n);
+      const delta = iv(ns[ns.length - 1]) - iv(ns[0]);
+      const tend = ns.length < 2 ? '—' : delta > 0
+        ? '<span style="color:var(--bad);font-weight:650">↑ empeora</span>'
+        : delta < 0 ? '<span style="color:var(--ok);font-weight:650">↓ mejora</span>'
+        : '<span class="rsv">estable</span>';
+      return `<tr><td>${esc(d.name)}</td>${cols.map((c, i) =>
+        `<td class="mid">${chip(ns[i])}<div class="hint" style="margin-top:2px">${fmt(c.ag.dom[d.name].prom)}</div></td>`).join('')}
+        <td class="mid">${tend}</td></tr>`;
+    }).join('')}
+    <tr style="background:var(--light)"><td><b>Calificación final</b></td>${cols.map(c =>
+      `<td class="mid">${chip(c.ag.total.nivel)}<div class="hint" style="margin-top:2px">${fmt(c.ag.total.prom)}</div></td>`).join('')}
+      <td></td></tr>
+    </tbody></table>
+    ${H.some(h => h.faltantes.length) ? `<div class="note w" style="margin-top:14px">
+      Algunas mediciones no traen los 72 ítems (${H.filter(h => h.faltantes.length).map(h =>
+        h.anio + ': faltan ' + h.faltantes.join(', ')).join(' · ')}). Los dominios afectados no son
+      estrictamente comparables entre años, porque se calculan sobre distinta cantidad de ítems.</div>` : ''}
+    </div>`;
+}
+
+/* ============================================================= EXCEL */
+const FILL = c => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + c } });
+const BORD = { top: { style: 'thin', color: { argb: 'FFDCE5ED' } },
+  bottom: { style: 'thin', color: { argb: 'FFDCE5ED' } } };
+
+function hojaTitulo(ws, txt, sub, ancho) {
+  ws.mergeCells(1, 1, 1, ancho);
+  const c = ws.getCell(1, 1); c.value = txt;
+  c.font = { bold: true, size: 15, color: { argb: 'FFFFFFFF' } };
+  c.fill = FILL('1B3A5C'); c.alignment = { vertical: 'middle', indent: 1 };
+  ws.getRow(1).height = 30;
+  if (sub) {
+    ws.mergeCells(2, 1, 2, ancho);
+    const s = ws.getCell(2, 1); s.value = sub;
+    s.font = { size: 10, italic: true, color: { argb: 'FF6E8398' } };
+    s.alignment = { indent: 1 };
+  }
+}
+function encabezado(ws, fila, labels) {
+  const r = ws.getRow(fila);
+  labels.forEach((l, i) => {
+    const c = r.getCell(i + 1); c.value = l;
+    c.font = { bold: true, size: 9.5, color: { argb: 'FF6E8398' } };
+    c.alignment = { vertical: 'middle', wrapText: true };
+    c.border = { bottom: { style: 'medium', color: { argb: 'FF1B3A5C' } } };
+  });
+  r.height = 26;
+}
+function celdaNivel(ws, f, col, nivel) {
+  const c = ws.getCell(f, col);
+  c.value = nivel || '—';
+  if (nivel) { c.fill = FILL(LVHEX[nivel]); c.font = { bold: true, size: 10, color: { argb: 'FF' + LVFG[nivel] } }; }
+  else c.font = { size: 10, color: { argb: 'FF9AA9B7' } };
+  c.alignment = { horizontal: 'center', vertical: 'middle' };
+  return c;
+}
+
+async function exportarExcel() {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'NOM-035 · generador'; wb.created = new Date();
+  const emp = S.opts.empresa || 'Centro de trabajo';
+  const hoy = new Date().toLocaleDateString('es-MX');
+
+  /* --- Resumen */
+  const R = wb.addWorksheet('Resumen', { views: [{ showGridLines: false }] });
+  R.columns = [{ width: 52 }, { width: 11 }, { width: 15 }, { width: 10 }, { width: 10 },
+    { width: 10 }, { width: 10 }, { width: 10 }];
+  hojaTitulo(R, 'NOM-035 · Guía III — Resumen de resultados', emp + ' · generado el ' + hoy, 8);
+  let f = 4;
+  R.getCell(f, 1).value = 'Calificación final del grupo';
+  R.getCell(f, 1).font = { bold: true, size: 12, color: { argb: 'FF1B3A5C' } };
+  R.getCell(f, 2).value = S.g.total.prom;
+  R.getCell(f, 2).font = { bold: true, size: 12 };
+  celdaNivel(R, f, 3, S.g.total.nivel);
+  R.getRow(f).height = 22;
+  f += 1;
+  R.getCell(f, 1).value = S.gente.length + ' respuestas · ' + (72 - S.m3.faltantes.length) +
+    ' de 72 ítems' + (S.m3.faltantes.length ? ' (faltan: ' + S.m3.faltantes.join(', ') + ')' : '');
+  R.getCell(f, 1).font = { size: 9.5, italic: true, color: { argb: 'FF6E8398' } };
+  f += 2;
+
+  [['CATEGORÍAS', CAT, S.g.cat], ['DOMINIOS', DOM, S.g.dom]].forEach(([tit, defs, ag]) => {
+    R.mergeCells(f, 1, f, 8);
+    R.getCell(f, 1).value = tit;
+    R.getCell(f, 1).font = { bold: true, size: 10, color: { argb: 'FF6E8398' } };
+    f++;
+    encabezado(R, f, ['Dimensión', 'Promedio', 'Nivel del grupo', ...NIV]);
+    f++;
+    defs.forEach((d, i) => {
+      const x = ag[d.name];
+      R.getCell(f, 1).value = d.name;
+      R.getCell(f, 2).value = x.prom;
+      R.getCell(f, 2).alignment = { horizontal: 'right' };
+      celdaNivel(R, f, 3, x.nivel);
+      NIV.forEach((n, j) => {
+        const c = R.getCell(f, 4 + j); c.value = x.dist[n];
+        c.alignment = { horizontal: 'center' };
+        if (x.dist[n]) { c.fill = FILL(LVHEX[n]); c.font = { bold: true, color: { argb: 'FF' + LVFG[n] } }; }
+        else c.font = { color: { argb: 'FFC7D3DE' } };
+      });
+      for (let k = 1; k <= 8; k++) {
+        R.getCell(f, k).border = BORD;
+        if (i % 2 === 0) { const cc = R.getCell(f, k); if (!cc.fill) cc.fill = FILL('F5F8FB'); }
+      }
+      f++;
+    });
+    f++;
+  });
+
+  /* --- Por colaborador */
+  const C2 = wb.addWorksheet('Por colaborador', { views: [{ state: 'frozen', xSplit: 2, ySplit: 3 }] });
+  const heads = ['Usuario', 'Nombre', 'Área / segmento', 'Antigüedad', 'Total', 'Nivel total',
+    ...CAT.map(c => c.name), ...DOM.map(d => d.name)];
+  C2.columns = heads.map((h, i) => ({ width: i < 2 ? 14 : i === 2 ? 26 : i < 6 ? 14 : 17 }));
+  hojaTitulo(C2, 'Resultados por colaborador', 'Confidencial — no difundir. Cada fila es la evaluación individual de una persona.', heads.length);
+  encabezado(C2, 3, heads);
+  S.gente.forEach((p, i) => {
+    const r = 4 + i;
+    const seg = S.cuts.filter(c => c.k.startsWith('x_')).map(c => p[c.k]).find(v => v) || '';
+    [p.usuario, p.nombre || '', seg, p.antiguedad || '', p.total].forEach((v, j) =>
+      C2.getCell(r, j + 1).value = v);
+    celdaNivel(C2, r, 6, p.totalNiv);
+    CAT.forEach((c, j) => {
+      const cc = C2.getCell(r, 7 + j); cc.value = p.cat[c.name];
+      cc.alignment = { horizontal: 'center' };
+      if (p.catNiv[c.name] && p.catNiv[c.name] !== 'Nulo') {
+        cc.fill = FILL(LVHEX[p.catNiv[c.name]]);
+        cc.font = { bold: true, color: { argb: 'FF' + LVFG[p.catNiv[c.name]] } };
+      }
+    });
+    DOM.forEach((d, j) => {
+      const cc = C2.getCell(r, 7 + CAT.length + j);
+      cc.value = p.dom[d.name] === null ? 'N/A' : p.dom[d.name];
+      cc.alignment = { horizontal: 'center' };
+      if (p.domNiv[d.name] && p.domNiv[d.name] !== 'Nulo') {
+        cc.fill = FILL(LVHEX[p.domNiv[d.name]]);
+        cc.font = { bold: true, color: { argb: 'FF' + LVFG[p.domNiv[d.name]] } };
+      }
+    });
+    for (let k = 1; k <= heads.length; k++) C2.getCell(r, k).border = BORD;
+  });
+
+  /* --- Respuestas ítem por ítem */
+  const I = wb.addWorksheet('Puntaje por ítem', { views: [{ state: 'frozen', xSplit: 1, ySplit: 3 }] });
+  I.columns = [{ width: 14 }].concat(ITEMS.map(() => ({ width: 6 })));
+  hojaTitulo(I, 'Puntaje por ítem (0 a 4)', 'Vacío = ítem no aplicable o sin respuesta. Los ítems condicionales se excluyen del puntaje, no se cuentan como cero.', ITEMS.length + 1);
+  encabezado(I, 3, ['Usuario'].concat(ITEMS.map(it => String(it.n))));
+  ITEMS.forEach((it, j) => { I.getCell(3, j + 2).note = it.n + '. ' + it.q; });
+  S.gente.forEach((p, i) => {
+    I.getCell(4 + i, 1).value = p.usuario;
+    ITEMS.forEach((it, j) => {
+      const c = I.getCell(4 + i, j + 2);
+      c.value = p.item[it.n]; c.alignment = { horizontal: 'center' };
+      if (p.item[it.n] >= 3) c.font = { bold: true, color: { argb: 'FFC00000' } };
+    });
+  });
+
+  /* --- Segmentaciones */
+  if (S.activeCuts.length) {
+    const G = wb.addWorksheet('Segmentaciones', { views: [{ showGridLines: false }] });
+    G.columns = [{ width: 34 }, { width: 8 }, { width: 12 }, { width: 15 }, { width: 58 }];
+    hojaTitulo(G, 'Resultados por segmento', 'Los segmentos con menos de 3 personas quedan reservados: publicar su resultado equivale a publicar una evaluación individual.', 5);
+    let fr = 4;
+    S.activeCuts.forEach(k => {
+      const c = S.cuts.find(x => x.k === k); if (!c) return;
+      G.mergeCells(fr, 1, fr, 5);
+      G.getCell(fr, 1).value = c.label.toUpperCase();
+      G.getCell(fr, 1).font = { bold: true, size: 10, color: { argb: 'FF6E8398' } };
+      fr++;
+      encabezado(G, fr, ['Segmento', 'n', 'Prom. total', 'Nivel', 'Categorías fuera de «Nulo»']);
+      fr++;
+      const d = cortar(S.gente, k, S.minN);
+      Object.entries(d).forEach(([v, x]) => {
+        G.getCell(fr, 1).value = v; G.getCell(fr, 2).value = x.n;
+        G.getCell(fr, 2).alignment = { horizontal: 'center' };
+        if (x.reservado) {
+          G.mergeCells(fr, 3, fr, 5);
+          G.getCell(fr, 3).value = 'Reservado — menos de 3 personas';
+          G.getCell(fr, 3).font = { italic: true, size: 10, color: { argb: 'FF6E8398' } };
+        } else {
+          G.getCell(fr, 3).value = x.total.prom;
+          G.getCell(fr, 3).alignment = { horizontal: 'center' };
+          celdaNivel(G, fr, 4, x.total.nivel);
+          G.getCell(fr, 5).value = CAT.filter(cc => x.cat[cc.name].nivel !== 'Nulo')
+            .map(cc => cc.name + ' (' + x.cat[cc.name].nivel + ')').join(' · ') || 'Ninguna';
+          G.getCell(fr, 5).font = { size: 10 };
+        }
+        for (let z = 1; z <= 5; z++) G.getCell(fr, z).border = BORD;
+        fr++;
+      });
+      fr++;
+    });
+  }
+
+  /* --- Comparativo */
+  if ((S.histCalc || []).length) {
+    const H = wb.addWorksheet('Comparativo', { views: [{ showGridLines: false }] });
+    const cols = S.histCalc.concat([{ anio: 'Actual', n: S.gente.length, ag: S.g }]);
+    H.columns = [{ width: 48 }].concat(cols.map(() => ({ width: 14 })));
+    hojaTitulo(H, 'Evolución por dominio', 'Un dominio calculado sobre distinta cantidad de ítems no es estrictamente comparable entre años.', cols.length + 1);
+    encabezado(H, 3, ['Dominio'].concat(cols.map(c => c.anio + ' (n=' + c.n + ')')));
+    DOM.forEach((d, i) => {
+      const r = 4 + i;
+      H.getCell(r, 1).value = d.name;
+      cols.forEach((c, j) => celdaNivel(H, r, 2 + j, c.ag.dom[d.name].nivel));
+      for (let z = 1; z <= cols.length + 1; z++) H.getCell(r, z).border = BORD;
+    });
+    const r = 4 + DOM.length;
+    H.getCell(r, 1).value = 'Calificación final';
+    H.getCell(r, 1).font = { bold: true };
+    cols.forEach((c, j) => celdaNivel(H, r, 2 + j, c.ag.total.nivel));
+  }
+
+  /* --- Guía I */
+  if (S.ets) {
+    const E = wb.addWorksheet('Guía I — ATS', { views: [{ showGridLines: false }] });
+    E.columns = [{ width: 14 }, { width: 26 }, { width: 15 }, { width: 11 }, { width: 11 },
+      { width: 11 }, { width: 24 }];
+    hojaTitulo(E, 'Guía I — Acontecimientos traumáticos severos',
+      'Confidencial. Las Secciones II a IV sólo aplican a quien reportó un acontecimiento en la Sección I.', 7);
+    encabezado(E, 3, ['Usuario', 'Área / segmento', '¿Acontecimiento?', 'Sec. II', 'Sec. III', 'Sec. IV', 'Evaluación']);
+    S.ets.lst.forEach((e, i) => {
+      const r = 4 + i;
+      [e.usuario, e.area || '', e.acontecimiento ? 'Sí' : 'No', e.sII, e.sIII, e.sIV]
+        .forEach((v, j) => { E.getCell(r, j + 1).value = v; if (j > 2) E.getCell(r, j + 1).alignment = { horizontal: 'center' }; });
+      const c = E.getCell(r, 7); c.value = e.eval;
+      if (e.eval === 'REQUIERE ATENCION') { c.fill = FILL('C00000'); c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; }
+      else { c.fill = FILL('5C9E45'); c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; }
+      c.alignment = { horizontal: 'center' };
+      for (let z = 1; z <= 7; z++) E.getCell(r, z).border = BORD;
+    });
+  }
+
+  /* --- Diagnóstico */
+  const D = wb.addWorksheet('Diagnóstico', { views: [{ showGridLines: false }] });
+  D.columns = [{ width: 34 }, { width: 96 }];
+  hojaTitulo(D, 'Diagnóstico del procesamiento', 'Trazabilidad de cómo se leyeron los archivos.', 2);
+  const lineas = [
+    ['Archivo Guía III', S.files.g3.name],
+    ['Archivo Guía I', S.files.g1 ? S.files.g1.name : '—'],
+    ['Padrón', S.files.pad ? S.files.pad.name : '—'],
+    ['Respuestas procesadas', String(S.gente.length)],
+    ['Ítems reconocidos', Object.keys(S.m3.mapa).length + ' de 72'],
+    ['Ítems ausentes', S.m3.faltantes.length ? S.m3.faltantes.map(n =>
+      n + '. ' + ITEMS.find(i => i.n === n).q).join(' | ') : 'ninguno'],
+    ['Cruce con padrón', S.padron ? S.diag.cruzados + ' de ' + S.gente.length : 'sin padrón'],
+    ['Sin coincidencia en padrón', S.diag.sinCruce.length ? S.diag.sinCruce.join(', ') : 'ninguno'],
+    ['Género', S.padron && S.padron.tieneGenero ? 'declarado en el padrón'
+      : (S.opts.genero ? 'INFERIDO del nombre de pila — es una estimación' : 'no disponible')],
+    ['Reserva de segmentos', S.opts.reservar ? 'activa (n mínimo 3)' : 'DESACTIVADA'],
+    ['Umbrales', 'Anexo de la NOM-035-STPS-2018, por dominio, categoría y calificación final'],
+    ['Generado', new Date().toLocaleString('es-MX')]
+  ];
+  lineas.forEach((l, i) => {
+    const r = 4 + i;
+    D.getCell(r, 1).value = l[0]; D.getCell(r, 1).font = { bold: true, size: 10 };
+    D.getCell(r, 2).value = l[1]; D.getCell(r, 2).alignment = { wrapText: true, vertical: 'top' };
+    D.getCell(r, 1).border = BORD; D.getCell(r, 2).border = BORD;
+  });
+
+  const buf = await wb.xlsx.writeBuffer();
+  bajar(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+    'NOM-035_resultados.xlsx');
+}
+
+function bajar(blob, nombre) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+/* ============================================================== POWERPOINT */
+const PPTX_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.11.0/pptxgen.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.11.0/pptxgen.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.min.js'
+];
+function cargarScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error(src));
+    document.head.appendChild(s);
+  });
+}
+async function asegurarPptx() {
+  if (window.PptxGenJS) return true;
+  for (const u of PPTX_URLS) {
+    try { await cargarScript(u); if (window.PptxGenJS) return true; } catch (e) { }
+  }
+  return false;
+}
+
+const NAVY = '1B3A5C', NAVYD = '12293F', MUTED = '6E8398', LIGHT = 'F1F5F9',
+      LINE = 'DCE5ED', INK = '1E2A35', WH = 'FFFFFF';
+const HEAD_F = 'Cambria', BODY_F = 'Calibri';
+
+async function exportarPptx() {
+  const P = new PptxGenJS();
+  P.layout = 'LAYOUT_WIDE';
+  const W = 13.333, M = 0.62;
+  const emp = S.opts.empresa || 'Centro de trabajo';
+  const nItems = 72 - S.m3.faltantes.length;
+  const cobPad = S.padron ? S.gente.length / Object.keys(S.padron.map).length : null;
+  const preliminar = (cobPad !== null && cobPad < 0.6) || S.gente.length < 30 || S.m3.faltantes.length > 0;
+
+  const sl = dark => { const s = P.addSlide(); s.background = { color: dark ? NAVY : WH }; return s; };
+  const tit = (s, t, sub) => {
+    s.addText(t, { x: M, y: .42, w: W - 2 * M, h: .52, fontSize: 26, bold: true, color: NAVY,
+      fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    if (sub) s.addText(sub, { x: M, y: .97, w: W - 2 * M, h: .3, fontSize: 12, color: MUTED,
+      fontFace: BODY_F, isTextBox: true, margin: 0 });
+  };
+  const pill = (s, x, y, w, h, lvl, fs) => {
+    const bg = lvl ? LVHEX[lvl] : LINE, fg = lvl ? LVFG[lvl] : MUTED;
+    s.addShape(P.ShapeType.roundRect, { x, y, w, h, fill: { color: bg }, line: { color: bg }, rectRadius: .05 });
+    s.addText(lvl || '—', { x, y, w, h, fontSize: fs || 10, bold: true, color: fg, align: 'center',
+      valign: 'middle', fontFace: BODY_F, isTextBox: true, margin: 0 });
+  };
+  const foot = (s, t) => s.addText(t, { x: M, y: 6.93, w: W - 2 * M, h: .3, fontSize: 9,
+    color: MUTED, italic: true, fontFace: BODY_F, isTextBox: true, margin: 0 });
+
+  /* --- portada */
+  {
+    const s = sl(true);
+    s.addShape(P.ShapeType.rect, { x: 7.9, y: 0, w: 5.44, h: 7.5, fill: { color: NAVYD }, line: { color: NAVYD } });
+    s.addText('RESULTADOS NOM-035', { x: M, y: 2.3, w: 6.9, h: .6, fontSize: 33, bold: true,
+      color: WH, fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    s.addText('Guía de Referencia III' + (S.ets ? ' y Guía de Referencia I' : ''),
+      { x: M, y: 2.95, w: 6.9, h: .5, fontSize: 20, color: 'A9C4DB', fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    if (preliminar) {
+      s.addShape(P.ShapeType.roundRect, { x: M, y: 3.8, w: 4.15, h: .42,
+        fill: { color: 'D97706' }, line: { color: 'D97706' }, rectRadius: .06 });
+      s.addText('MUESTRA DE PARAMETRIZACIÓN', { x: M, y: 3.8, w: 4.15, h: .42, fontSize: 11,
+        bold: true, color: WH, align: 'center', valign: 'middle', fontFace: BODY_F, isTextBox: true, margin: 0 });
+      s.addText('No apto para difusión ni para el registro de la NOM-035.', { x: M, y: 4.34, w: 6.9,
+        h: .4, fontSize: 12, color: 'A9C4DB', fontFace: BODY_F, isTextBox: true, margin: 0 });
+    }
+    [['Centro de trabajo', emp], ['Respuestas', S.gente.length + ' en Guía III' + (S.ets ? ' · ' + S.ets.lst.length + ' en Guía I' : '')],
+     ['Ítems evaluados', nItems + ' de 72'],
+     ['Padrón', S.padron ? Object.keys(S.padron.map).length + ' personas · ' + Math.round(cobPad * 100) + '% de participación' : 'no cargado'],
+     ['Generado', new Date().toLocaleDateString('es-MX')]].forEach((p, i) => {
+      const y = 2.0 + i * .72;
+      s.addText(p[0], { x: 8.5, y, w: 4.3, h: .26, fontSize: 10, color: '7FA3C0', fontFace: BODY_F, isTextBox: true, margin: 0 });
+      s.addText(String(p[1]), { x: 8.5, y: y + .26, w: 4.3, h: .34, fontSize: 13, bold: true,
+        color: WH, fontFace: BODY_F, isTextBox: true, margin: 0 });
+    });
+  }
+
+  /* --- general */
+  {
+    const s = sl(); const g = S.g;
+    tit(s, 'Guía III — Resultado general', 'Factores de riesgo psicosocial y entorno organizacional · ' + S.gente.length + ' colaboradores');
+    s.addShape(P.ShapeType.roundRect, { x: M, y: 1.75, w: 4.1, h: 2.5,
+      fill: { color: LVHEX[g.total.nivel] }, line: { color: LVHEX[g.total.nivel] }, rectRadius: .06 });
+    const fg = LVFG[g.total.nivel];
+    s.addText('Nivel de riesgo del centro de trabajo', { x: M + .3, y: 2.0, w: 3.5, h: .4,
+      fontSize: 11, color: fg, fontFace: BODY_F, isTextBox: true, margin: 0 });
+    s.addText(g.total.nivel, { x: M + .3, y: 2.4, w: 3.5, h: 1.0, fontSize: 50, bold: true,
+      color: fg, fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    s.addText('Calificación final del grupo: ' + g.total.prom + ' puntos', { x: M + .3, y: 3.45,
+      w: 3.5, h: .4, fontSize: 12.5, bold: true, color: fg, fontFace: BODY_F, isTextBox: true, margin: 0 });
+    s.addText('Distribución de los ' + S.gente.length + ' colaboradores por nivel individual',
+      { x: M + 4.55, y: 1.72, w: 7.5, h: .3, fontSize: 11, bold: true, color: MUTED, fontFace: BODY_F, isTextBox: true, margin: 0 });
+    NIV.forEach((n, i) => {
+      const y = 2.12 + i * .52, v = g.total.dist[n], on = v > 0;
+      s.addText(n, { x: M + 4.55, y, w: 1.45, h: .42, fontSize: 11, bold: on, color: on ? INK : MUTED,
+        fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+      s.addShape(P.ShapeType.rect, { x: M + 6.08, y: y + .07, w: 5.35, h: .28,
+        fill: { color: 'F4F7FA' }, line: { color: LINE } });
+      if (on) s.addShape(P.ShapeType.rect, { x: M + 6.08, y: y + .07, w: 5.35 * v / S.gente.length,
+        h: .28, fill: { color: LVHEX[n] }, line: { color: LVHEX[n] } });
+      s.addText(String(v), { x: M + 11.52, y, w: .5, h: .42, fontSize: 11, bold: on,
+        color: on ? NAVY : LINE, fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+    });
+    if (S.m3.faltantes.length) foot(s, 'La calificación final se calcula sobre ' + nItems +
+      ' de los 72 ítems: faltan en el cuestionario los ítems ' + S.m3.faltantes.join(', ') +
+      '. Los dominios que los contienen quedan subestimados.');
+  }
+
+  /* --- tabla de categorías y dominios */
+  const tablaSlide = (titulo, sub, defs, ag, rowH) => {
+    const s = sl(); tit(s, titulo, sub);
+    const y0 = 1.95, xN = M, wN = 5.3, xP = M + 5.45, xL = M + 6.45, wL = 1.2, xD = M + 7.9, wD = .78, gp = .06;
+    ['Dimensión', 'Prom.', 'Nivel', 'Colaboradores en cada nivel'].forEach((t, i) => {
+      const x = [xN, xP, xL, xD][i], w = [wN, .85, wL, 5 * (wD + gp)][i];
+      s.addText(t, { x, y: y0 - .33, w, h: .28, fontSize: 9, bold: true, color: MUTED,
+        align: i ? 'center' : 'left', fontFace: BODY_F, isTextBox: true, margin: 0 });
+    });
+    NIV.forEach((n, i) => s.addText(n, { x: xD + i * (wD + gp), y: y0 - .07, w: wD, h: .2,
+      fontSize: 7, color: MUTED, align: 'center', fontFace: BODY_F, isTextBox: true, margin: 0 }));
+    defs.forEach((d, i) => {
+      const y = y0 + .18 + i * rowH, x = ag[d.name];
+      if (i % 2 === 0) s.addShape(P.ShapeType.rect, { x: xN - .1, y: y - .03, w: W - 2 * M + .2,
+        h: rowH - .05, fill: { color: LIGHT }, line: { color: LIGHT } });
+      s.addText(d.name, { x: xN, y, w: wN, h: rowH - .08, fontSize: 10.5, color: INK,
+        fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+      s.addText(String(x.prom === null ? '—' : x.prom), { x: xP, y, w: .85, h: rowH - .08,
+        fontSize: 11, bold: true, color: NAVY, align: 'center', fontFace: BODY_F, isTextBox: true,
+        margin: 0, valign: 'middle' });
+      pill(s, xL, y + .03, wL, rowH - .14, x.nivel, 9);
+      NIV.forEach((n, j) => {
+        const v = x.dist[n], on = v > 0;
+        s.addShape(P.ShapeType.roundRect, { x: xD + j * (wD + gp), y: y + .03, w: wD, h: rowH - .14,
+          fill: { color: on ? LVHEX[n] : 'F4F7FA' }, line: { color: on ? LVHEX[n] : LINE }, rectRadius: .04 });
+        s.addText(String(v), { x: xD + j * (wD + gp), y: y + .03, w: wD, h: rowH - .14, fontSize: 10,
+          bold: on, color: on ? LVFG[n] : LINE, align: 'center', valign: 'middle', fontFace: BODY_F,
+          isTextBox: true, margin: 0 });
+      });
+    });
+    return s;
+  };
+  tablaSlide('Guía III — Las cinco categorías', 'Promedio del grupo y distribución individual', CAT, S.g.cat, .7);
+  const sd = tablaSlide('Guía III — Los diez dominios', 'Promedio del grupo y distribución individual', DOM, S.g.dom, .47);
+  foot(sd, 'Umbrales por dominio según el Anexo de la NOM-035-STPS-2018.');
+
+  /* --- foco de riesgo */
+  const focos = DOM.map(d => ({ d, x: S.g.dom[d.name],
+    alt: S.g.dom[d.name].dist['Muy alto'] + S.g.dom[d.name].dist['Alto'] + S.g.dom[d.name].dist['Medio'] }))
+    .filter(f => f.alt > 0).sort((a, b) => b.alt - a.alt).slice(0, 3);
+  if (focos.length) {
+    const s = sl();
+    tit(s, 'Dónde está el riesgo, en realidad', 'Dominios con casos individuales elevados que el promedio del grupo no muestra');
+    const wc = (W - 2 * M - (focos.length - 1) * .4) / focos.length;
+    focos.forEach((f, i) => {
+      const x = M + i * (wc + .4);
+      s.addShape(P.ShapeType.roundRect, { x, y: 1.7, w: wc, h: 3.3, fill: { color: WH },
+        line: { color: LINE }, rectRadius: .04 });
+      s.addText(f.d.name, { x: x + .3, y: 1.92, w: wc - .6, h: .7, fontSize: 15, bold: true,
+        color: NAVY, fontFace: HEAD_F, isTextBox: true, margin: 0, valign: 'top' });
+      s.addText(f.alt + ' de ' + S.gente.length, { x: x + .3, y: 2.66, w: wc - .6, h: .7,
+        fontSize: 32, bold: true, color: 'D97706', fontFace: HEAD_F, isTextBox: true, margin: 0 });
+      s.addText('colaboradores en Medio o superior', { x: x + .3, y: 3.34, w: wc - .6, h: .34,
+        fontSize: 10.5, color: MUTED, fontFace: BODY_F, isTextBox: true, margin: 0 });
+      const nb = Math.min(5, Math.floor((wc - .6) / .72));
+      NIV.slice(0, nb).forEach((n, j) => {
+        const bw = (wc - .6 - (nb - 1) * .08) / nb, bx = x + .3 + j * (bw + .08), v = f.x.dist[n], on = v > 0;
+        s.addShape(P.ShapeType.roundRect, { x: bx, y: 3.82, w: bw, h: .46,
+          fill: { color: on ? LVHEX[n] : 'F4F7FA' }, line: { color: on ? LVHEX[n] : LINE }, rectRadius: .04 });
+        s.addText(String(v), { x: bx, y: 3.82, w: bw, h: .46, fontSize: 12, bold: true,
+          color: on ? LVFG[n] : LINE, align: 'center', valign: 'middle', fontFace: BODY_F, isTextBox: true, margin: 0 });
+        s.addText(n, { x: bx, y: 4.3, w: bw, h: .2, fontSize: 6.5, color: MUTED, align: 'center',
+          fontFace: BODY_F, isTextBox: true, margin: 0 });
+      });
+      s.addText('Promedio del grupo ' + f.x.prom + ' (' + f.x.nivel + '). El promedio compensa: hay que mirar los casos.',
+        { x: x + .3, y: 4.56, w: wc - .6, h: .38, fontSize: 10, color: INK, fontFace: BODY_F,
+          isTextBox: true, margin: 0 });
+    });
+  }
+
+  /* --- segmentaciones */
+  S.activeCuts.forEach(k => {
+    const c = S.cuts.find(x => x.k === k); if (!c) return;
+    const d = cortar(S.gente, k, S.minN);
+    let claves = Object.keys(d);
+    if (c.orden) claves = c.orden.filter(x => claves.includes(x)).concat(claves.filter(x => !c.orden.includes(x)));
+    if (!claves.length) return;
+    const s = sl();
+    tit(s, 'Guía III — Por ' + c.label.toLowerCase(),
+      claves.length + ' segmento(s) · los de menos de 3 personas quedan reservados');
+    const y0 = 1.98, rh = Math.min(.6, 4.4 / claves.length);
+    ['Segmento', 'n', 'Prom. total', 'Nivel', 'Categorías fuera de «Nulo»'].forEach((t, i) => {
+      const x = [M, M + 4.3, M + 5.05, M + 6.4, M + 7.95][i], w = [4.1, .6, 1.15, 1.3, 4.15][i];
+      s.addText(t, { x, y: y0 - .33, w, h: .28, fontSize: 9, bold: true, color: MUTED,
+        align: i === 0 || i === 4 ? 'left' : 'center', fontFace: BODY_F, isTextBox: true, margin: 0 });
+    });
+    claves.forEach((v, i) => {
+      const x = d[v], y = y0 + .1 + i * rh;
+      if (i % 2 === 0) s.addShape(P.ShapeType.rect, { x: M - .1, y: y - .03, w: W - 2 * M + .2,
+        h: rh - .05, fill: { color: LIGHT }, line: { color: LIGHT } });
+      s.addText(String(v), { x: M, y, w: 4.1, h: rh - .1, fontSize: 11, bold: true, color: INK,
+        fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+      s.addText(String(x.n), { x: M + 4.3, y, w: .6, h: rh - .1, fontSize: 11, bold: true, color: NAVY,
+        align: 'center', fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+      if (x.reservado) {
+        s.addText('Resultado reservado — menos de 3 personas en el segmento', { x: M + 5.05, y,
+          w: 7.05, h: rh - .1, fontSize: 10, italic: true, color: MUTED, fontFace: BODY_F,
+          isTextBox: true, margin: 0, valign: 'middle' });
+      } else {
+        s.addText(String(x.total.prom), { x: M + 5.05, y, w: 1.15, h: rh - .1, fontSize: 11, bold: true,
+          color: NAVY, align: 'center', fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+        pill(s, M + 6.4, y + .05, 1.3, rh - .2, x.total.nivel, 9.5);
+        const fuera = CAT.filter(cc => x.cat[cc.name].nivel && x.cat[cc.name].nivel !== 'Nulo')
+          .map(cc => cc.name + ' (' + x.cat[cc.name].nivel + ')');
+        s.addText(fuera.length ? fuera.join(' · ') : 'Ninguna', { x: M + 7.95, y, w: 4.15, h: rh - .1,
+          fontSize: 9.5, color: fuera.length ? INK : MUTED, fontFace: BODY_F, isTextBox: true,
+          margin: 0, valign: 'middle' });
+      }
+    });
+    if (k === 'genero' && !(S.padron && S.padron.tieneGenero))
+      foot(s, 'Género inferido del nombre de pila: es una estimación, no un dato declarado por la persona. No apto para un reporte de cumplimiento.');
+  });
+
+  /* --- Guía I */
+  if (S.ets) {
+    const s = sl(); const e = S.ets;
+    tit(s, 'Guía I — Acontecimientos traumáticos severos', e.lst.length + ' respuestas');
+    const col = e.req > 0 ? 'C00000' : '5C9E45';
+    s.addShape(P.ShapeType.roundRect, { x: M, y: 1.8, w: 3.55, h: 2.3, fill: { color: col },
+      line: { color: col }, rectRadius: .06 });
+    s.addText(String(e.req), { x: M, y: 1.92, w: 3.55, h: 1.15, fontSize: 68, bold: true, color: WH,
+      align: 'center', fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    s.addText('de ' + e.lst.length + ' colaboradores\nrequieren atención clínica', { x: M, y: 3.08,
+      w: 3.55, h: .8, fontSize: 12.5, bold: true, color: WH, align: 'center', fontFace: BODY_F,
+      isTextBox: true, margin: 0 });
+    [['Respuestas recibidas', e.lst.length],
+     ['Reportaron algún acontecimiento traumático severo', e.acont],
+     ['Requieren atención clínica (Secciones II a IV)', e.req],
+     ['Síntomas marcados sin acontecimiento reportado', e.señal]].forEach((p, i) => {
+      const y = 1.8 + i * .6;
+      s.addShape(P.ShapeType.rect, { x: M + 3.95, y, w: 8.15, h: .52,
+        fill: { color: i % 2 === 0 ? LIGHT : WH }, line: { color: LINE } });
+      s.addText(p[0], { x: M + 4.2, y, w: 6.7, h: .52, fontSize: 11.5, color: INK, fontFace: BODY_F,
+        isTextBox: true, margin: 0, valign: 'middle' });
+      s.addText(String(p[1]), { x: M + 11.0, y, w: .9, h: .52, fontSize: 13, bold: true, color: NAVY,
+        align: 'center', fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+    });
+    if (e.señal) {
+      s.addShape(P.ShapeType.roundRect, { x: M, y: 4.4, w: W - 2 * M, h: 1.1, fill: { color: LIGHT },
+        line: { color: LINE }, rectRadius: .04 });
+      s.addText(e.señal + ' persona(s) marcaron síntomas de las Secciones III o IV sin haber reportado un acontecimiento en la Sección I. Por la lógica del instrumento no disparan atención y así debe quedar en el registro, pero es el tipo de señal que conviene derivar a salud ocupacional por otra vía.',
+        { x: M + .32, y: 4.55, w: W - 2 * M - .64, h: .8, fontSize: 11.5, color: INK, fontFace: BODY_F,
+          isTextBox: true, margin: 0 });
+    }
+  }
+
+  /* --- comparativo */
+  if ((S.histCalc || []).length) {
+    const s = sl();
+    const cols = S.histCalc.concat([{ anio: 'Actual', n: S.gente.length, ag: S.g }]);
+    tit(s, 'Comparativo por dominio', 'Evolución del nivel de riesgo en cada dominio');
+    const y0 = 2.0, rh = .42, xN = M, wN = 4.6;
+    const wc = Math.min(1.5, (W - 2 * M - wN - .3) / cols.length);
+    s.addText('Dominio', { x: xN, y: y0 - .33, w: wN, h: .28, fontSize: 9, bold: true, color: MUTED,
+      fontFace: BODY_F, isTextBox: true, margin: 0 });
+    cols.forEach((c, j) => s.addText(c.anio + '\nn=' + c.n, { x: xN + wN + .3 + j * wc, y: y0 - .45,
+      w: wc, h: .4, fontSize: 9, bold: true, color: MUTED, align: 'center', fontFace: BODY_F,
+      isTextBox: true, margin: 0 }));
+    DOM.forEach((d, i) => {
+      const y = y0 + .1 + i * rh;
+      if (i % 2 === 0) s.addShape(P.ShapeType.rect, { x: xN - .1, y: y - .02, w: W - 2 * M + .2,
+        h: rh - .04, fill: { color: LIGHT }, line: { color: LIGHT } });
+      s.addText(d.name, { x: xN, y, w: wN, h: rh - .08, fontSize: 10, color: INK, fontFace: BODY_F,
+        isTextBox: true, margin: 0, valign: 'middle' });
+      cols.forEach((c, j) => pill(s, xN + wN + .35 + j * wc, y + .02, wc - .1, rh - .12,
+        c.ag.dom[d.name].nivel, 8));
+    });
+    foot(s, 'Un dominio calculado sobre distinta cantidad de ítems no es estrictamente comparable entre años.');
+  }
+
+  /* --- pendientes */
+  {
+    const s = sl();
+    tit(s, 'Qué falta para que este reporte sea publicable', 'Detectado automáticamente a partir de los datos cargados');
+    const it = [];
+    if (cobPad !== null && cobPad < 0.6) it.push(['Ampliar la muestra', 'Bloqueante',
+      S.gente.length + ' respuestas sobre ' + Object.keys(S.padron.map).length + ' personas del padrón (' +
+      Math.round(cobPad * 100) + '%). La norma pide aplicar el instrumento a todo el personal o a una muestra representativa.']);
+    if (S.m3.faltantes.length) it.push(['Completar el cuestionario', 'Bloqueante',
+      'Faltan los ítems ' + S.m3.faltantes.join(', ') + '. Los dominios que los contienen quedan subestimados y la calificación final va sobre ' + nItems + ' de 72 ítems.']);
+    if (!S.padron) it.push(['Cargar el padrón', 'Configuración',
+      'Sin padrón no hay cortes por área, antigüedad ni género, ni cálculo de participación.']);
+    else if (!S.padron.tieneGenero) it.push(['Capturar el género', 'Configuración',
+      S.opts.genero ? 'Hoy se infiere del nombre de pila, que es una estimación. Agregá la pregunta al cuestionario o la columna al padrón.'
+        : 'No está disponible. Agregá la pregunta al cuestionario o la columna al padrón.']);
+    if (!S.ets) it.push(['Aplicar la Guía I', 'Pendiente',
+      'No se cargó el cuestionario de acontecimientos traumáticos severos, que la norma pide junto con la Guía III.']);
+    if (!(S.histCalc || []).length) it.push(['Cargar mediciones anteriores', 'Pendiente',
+      'Sin histórico no se puede mostrar la evolución por dominio ni verificar si el riesgo baja.']);
+    it.push(['Entrevistas de seguimiento de ATS', 'Pendiente',
+      'El seguimiento de los casos positivos es un proceso clínico posterior al cuestionario y necesita su propio registro.']);
+    const n = Math.min(it.length, 5), h = Math.min(1.1, 5.1 / n);
+    it.slice(0, 5).forEach((r, i) => {
+      const y = 1.72 + i * (h + .12);
+      s.addShape(P.ShapeType.roundRect, { x: M, y, w: W - 2 * M, h, fill: { color: WH },
+        line: { color: LINE }, rectRadius: .04 });
+      const cc = r[1] === 'Bloqueante' ? 'C00000' : r[1] === 'Configuración' ? 'D97706' : '4A7194';
+      s.addShape(P.ShapeType.roundRect, { x: M + .3, y: y + (h - .38) / 2, w: 1.42, h: .38,
+        fill: { color: cc }, line: { color: cc }, rectRadius: .06 });
+      s.addText(r[1], { x: M + .3, y: y + (h - .38) / 2, w: 1.42, h: .38, fontSize: 9, bold: true,
+        color: WH, align: 'center', valign: 'middle', fontFace: BODY_F, isTextBox: true, margin: 0 });
+      s.addText(r[0], { x: M + 1.95, y, w: 4.0, h, fontSize: 14, bold: true, color: NAVY,
+        fontFace: HEAD_F, isTextBox: true, margin: 0, valign: 'middle' });
+      s.addText(r[2], { x: M + 6.05, y: y + .08, w: 5.8, h: h - .16, fontSize: 10.5, color: INK,
+        fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+    });
+  }
+
+  await P.writeFile({ fileName: 'NOM-035_reporte.pptx' });
+}
+
+/* --------------------------------------------------------------- botones */
+async function conSpinner(btn, fn) {
+  const t = btn.textContent;
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Generando…';
+  try { await fn(); } catch (e) { alert('Error generando el archivo: ' + e.message); console.error(e); }
+  btn.disabled = false; btn.textContent = t;
+}
+$('#dl-xlsx').addEventListener('click', e => conSpinner(e.target, exportarExcel));
+$('#dl-pptx').addEventListener('click', e => conSpinner(e.target, async () => {
+  if (!await asegurarPptx()) {
+    $('#pptx-hint').innerHTML = 'No se pudo cargar la librería de PowerPoint desde el CDN. ' +
+      'En un proyecto propio se resuelve con <code>npm install pptxgenjs</code>; el Excel funciona igual.';
+    throw new Error('PptxGenJS no disponible');
+  }
+  await exportarPptx();
+}));
+window.ir = ir;
+</script>
+</body>
+</html>
