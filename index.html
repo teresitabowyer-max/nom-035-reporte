@@ -26,8 +26,8 @@ a{color:var(--steel)}
 /* ---------------------------------------------------------------- header */
 header{background:var(--navy-d);color:#fff;padding:22px 0 20px}
 header .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.logo{width:38px;height:38px;border-radius:9px;background:var(--steel);display:grid;
-  place-items:center;font-weight:700;font-size:13px;flex:none}
+.logo{width:38px;height:38px;border-radius:9px;background:var(--steel);display:flex;
+  align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
 header h1{font-size:19px}
 header .sub{font-size:12.5px;color:#9FBBD2;margin-top:2px}
 .privacy{margin-left:auto;font-size:12px;color:#9FBBD2;background:rgba(255,255,255,.07);
@@ -63,7 +63,7 @@ main{padding:26px 0 70px}
   text-align:left;transition:.15s;cursor:pointer;position:relative}
 .drop:hover,.drop.over{border-color:var(--steel);background:#FAFCFE}
 .drop.done{border-style:solid;border-color:#BEDCC0;background:#F5FBF5}
-.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop input{position:absolute;top:0;right:0;bottom:0;left:0;opacity:0;cursor:pointer}
 .drop .t{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px}
 .drop .d{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.45}
 .badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:20px;
@@ -95,7 +95,8 @@ td.mid{text-align:center}
   font-size:11.5px;font-weight:700;color:#fff}
 .chip.d{color:var(--navy)}
 .cnt{display:inline-grid;grid-auto-flow:column;gap:4px}
-.cnt i{width:30px;height:24px;border-radius:5px;display:grid;place-items:center;font-size:11.5px;
+.cnt i{width:30px;height:24px;border-radius:5px;display:flex;align-items:center;
+  justify-content:center;font-size:11.5px;
   font-weight:700;font-style:normal;border:1px solid var(--line);color:#C7D3DE;background:#FAFCFE}
 .bar{height:7px;border-radius:4px;background:var(--light);overflow:hidden;min-width:70px}
 .bar>i{display:block;height:100%;border-radius:4px}
@@ -109,8 +110,8 @@ td.mid{text-align:center}
 .note b{font-weight:650}
 .diag{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
 .diag:first-child{border-top:0}
-.dot{width:20px;height:20px;border-radius:50%;flex:none;display:grid;place-items:center;
-  color:#fff;font-size:12px;font-weight:700;margin-top:1px}
+.dot{width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;
+  justify-content:center;color:#fff;font-size:12px;font-weight:700;margin-top:1px}
 .diag .tx{font-size:13.5px;line-height:1.5}
 .diag .tx b{font-weight:650}
 .diag .tx span{color:var(--muted);font-size:12.5px}
@@ -126,13 +127,96 @@ td.mid{text-align:center}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .tog{display:flex;align-items:center;gap:9px;font-size:13.5px;cursor:pointer;
   padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
-.tog input{accent-color:var(--navy);width:15px;height:15px}
+.tog input{accent-color:var(--navy);width:15px;height:15px;margin:0 3px 0 0;flex:none}
 .tog.on{border-color:var(--steel);background:#F6FAFD}
 .yr{width:78px;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--line);
   border-radius:7px}
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
   border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:-3px}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* ------------------------------------------------- zonas de carga (v2) */
+.grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid.tight{align-items:start}
+.sect .opt2{text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)}
+.drop{display:flex;flex-direction:column}
+.drop p.d{flex:1;margin:11px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.dh{display:flex;align-items:flex-start;gap:11px}
+.di{width:34px;height:34px;border-radius:9px;background:var(--navy);color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:12.5px;font-weight:700;flex:none;line-height:1}
+.drop.done .di{background:#5C9E45}
+.dt{font-weight:600;font-size:14.5px;line-height:1.3;flex:1;min-width:0}
+.dt em{display:block;font-style:normal;font-size:11.5px;font-weight:400;color:var(--muted);margin-top:3px}
+.dh .badge{flex:none;margin-top:3px}
+.card.pad2{padding:20px}
+.card.split{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:940px){.card.split{grid-template-columns:1fr}}
+.drop.bare{border:1.5px dashed #C3D2DF;border-radius:9px;padding:16px;box-shadow:none}
+.mini{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.ch{font-size:12px;background:var(--light);border:1px solid var(--line);border-radius:20px;
+  padding:5px 11px;color:var(--ink)}
+.ch.req2{background:#FDECEC;border-color:#F2C9C9;color:#8E1B1B;font-weight:600}
+.side p.hint{margin:12px 0 0}
+.drop.add{flex-direction:row;align-items:center;gap:13px;padding:14px 16px}
+.plus{width:30px;height:30px;border-radius:8px;border:1.5px dashed #B9CAD8;color:var(--steel);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;
+  flex:none;line-height:1}
+.drop.add:hover .plus{border-color:var(--steel);background:#F1F7FC;color:var(--navy)}
+/* --------------------------------------------- filas de años anteriores */
+.frow{display:flex;align-items:center;gap:13px;border:1px solid var(--line);border-radius:9px;
+  padding:11px 13px;margin-bottom:9px;background:#fff}
+.frow.bad{border-color:#F0C9C9;background:#FDF8F8}
+.fnum{width:26px;height:26px;border-radius:7px;background:var(--light);color:var(--navy);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.frow.bad .fnum{background:#FBE3E3;color:#8E1B1B}
+.fmeta{flex:1;min-width:0}
+.fn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.fs em{font-style:normal;color:var(--bad);font-weight:600}
+.yrbox{display:flex;align-items:center;gap:7px;flex:none}
+.yrbox>span{font-size:11.5px;color:var(--muted)}
+.yr.warn{border-color:#E9B94E;background:#FFFBF2}
+.xbtn{border:1px solid var(--line);background:#fff;border-radius:7px;width:30px;height:30px;
+  cursor:pointer;color:var(--muted);font-size:17px;line-height:1;font-family:inherit;flex:none}
+.xbtn:hover{border-color:#E0B4B4;color:var(--bad);background:#FDF6F6}
+
+/* ------------------------------------------------------ campos de portada */
+.fld{display:block}
+.fld>span{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.fld>span b{font-weight:400;color:#9AA9B7}
+.fld input,.fld textarea{width:100%;font:inherit;font-size:13.5px;padding:9px 11px;
+  border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.fld textarea{resize:vertical;line-height:1.45;min-height:76px}
+.fld input:focus,.fld textarea:focus{outline:none;border-color:var(--steel)}
+.logoimg{width:36px;height:36px;object-fit:contain;background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:3px;flex:none;display:block}
+
+/* ------------------------------------------- tarjetas de segmento (3 vistas) */
+.segcard{margin-bottom:16px}
+.seghead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.segn{font-size:17px;font-weight:650;color:var(--navy);letter-spacing:-.01em}
+.segtop{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:center}
+@media(max-width:940px){.segtop{grid-template-columns:1fr}}
+.lvbox{border-radius:10px;padding:16px 18px;text-align:center}
+.lvbox span{display:block;font-size:26px;font-weight:750;letter-spacing:-.02em;line-height:1.1}
+.lvbox small{display:block;font-size:11.5px;margin-top:4px;opacity:.85;font-weight:600}
+.ntrab .mini{margin-bottom:8px}
+.sbar{display:flex;height:24px;border-radius:6px;overflow:hidden;background:var(--light);
+  flex:1;min-width:0;border:1px solid var(--line)}
+.sbar i{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;
+  font-style:normal;min-width:0;overflow:hidden;flex:none}
+.srow{display:flex;align-items:center;gap:11px;margin-bottom:7px}
+.srow .lbl{width:168px;flex:none;font-size:11.5px;color:var(--ink);line-height:1.25;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .sbar{height:20px}
+.slg{display:flex;flex-wrap:wrap;gap:16px;margin-top:18px;padding-top:14px;
+  border-top:1px solid var(--line)}
+.slg>span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.slg i{width:10px;height:10px;border-radius:2px;display:block;flex:none}
 .empty{text-align:center;padding:54px 20px;color:var(--muted);font-size:14px}
 .rsv{font-size:12.5px;color:var(--muted);font-style:italic}
 </style>
@@ -161,47 +245,90 @@ td.mid{text-align:center}
 
 <!-- ================================================================ CARGA -->
 <section class="panel on" id="p-carga">
-  <div class="grid g2" style="margin-bottom:16px">
-    <div>
-      <div class="sect">Cuestionarios</div>
-      <div class="grid" style="gap:12px">
-        <label class="drop" id="d-g3"><input type="file" accept=".xlsx,.xls,.csv">
-          <div class="t">Guía III — Factores de riesgo psicosocial <span class="badge req">Requerido</span></div>
-          <div class="d">Export del cuestionario de 72 ítems. Las columnas se reconocen por el texto de cada pregunta, no por su posición.</div>
-          <div class="fname"></div></label>
-        <label class="drop" id="d-g1"><input type="file" accept=".xlsx,.xls,.csv">
-          <div class="t">Guía I — Acontecimientos traumáticos severos <span class="badge opt">Opcional</span></div>
-          <div class="d">Export del cuestionario de ATS: 6 acontecimientos y 14 preguntas de síntomas.</div>
-          <div class="fname"></div></label>
+
+  <div class="sect">Paso 1 · Cuestionarios de esta medición</div>
+  <div class="grid g2" style="margin-bottom:24px">
+    <label class="drop" id="d-g3"><input type="file" accept=".xlsx,.xls,.csv">
+      <div class="dh"><span class="di">III</span>
+        <span class="dt">Guía III — Factores de riesgo psicosocial<em>Cuestionario de 72 ítems</em></span>
+        <span class="badge req">Requerido</span></div>
+      <p class="d">Reconoce las columnas por el texto de cada pregunta, no por su posición: tolera exports con las preguntas en otro orden.</p>
+      <div class="fname"></div></label>
+    <label class="drop" id="d-g1"><input type="file" accept=".xlsx,.xls,.csv">
+      <div class="dh"><span class="di">I</span>
+        <span class="dt">Guía I — Acontecimientos traumáticos severos<em>6 acontecimientos y 14 preguntas de síntomas</em></span>
+        <span class="badge opt">Opcional</span></div>
+      <p class="d">La norma la pide junto con la Guía III. Si no la cargás, el reporte la deja marcada como pendiente.</p>
+      <div class="fname"></div></label>
+  </div>
+
+  <div class="sect">Paso 2 · Padrón de colaboradores <span class="opt2">— es lo que habilita las segmentaciones</span></div>
+  <div class="card pad2 split" style="margin-bottom:24px">
+    <label class="drop bare" id="d-pad"><input type="file" accept=".xlsx,.xls,.csv">
+      <div class="dh"><span class="di">👤</span>
+        <span class="dt">Usuarios<em>Recomendado</em></span>
+        <span class="badge opt">Opcional</span></div>
+      <p class="d">Se cruza con las respuestas por número de empleado. Sin padrón el cálculo funciona igual, pero no hay cortes por área, antigüedad ni género, ni porcentaje de participación.</p>
+      <div class="fname"></div></label>
+    <div class="side">
+      <div class="mini">Columnas que reconoce solo</div>
+      <div class="chips">
+        <span class="ch req2">Número de empleado</span>
+        <span class="ch">Área · Departamento · Puesto</span>
+        <span class="ch">Fecha de contratación → antigüedad</span>
+        <span class="ch">Género o Sexo, si viene declarado</span>
+      </div>
+      <p class="hint">Cualquier otra columna con pocos valores distintos se ofrece como segmentación. Teléfono, email, fechas e identificadores quedan afuera, para que no termines con un segmento por persona.</p>
+    </div>
+  </div>
+
+  <div class="sect">Paso 3 · Mediciones de años anteriores <span class="opt2">— para el comparativo por dominio</span></div>
+  <div class="card pad2" style="margin-bottom:24px">
+    <div id="hist-list"></div>
+    <label class="drop bare add" id="d-hist"><input type="file" accept=".xlsx,.xls,.csv" multiple>
+      <span class="plus">+</span>
+      <span class="dt">Agregar exports de Guía III de otros años<em>Seleccioná o arrastrá varios archivos a la vez — el año se detecta del nombre del archivo</em></span>
+    </label>
+  </div>
+
+  <div class="sect">Paso 4 · Portada del reporte <span class="opt2">— opcional, se usa en el PowerPoint y en el Excel</span></div>
+  <div class="card pad2" style="margin-bottom:24px">
+    <div class="grid g2" style="gap:26px;align-items:start">
+      <div>
+        <label class="fld"><span>Nombre del documento</span>
+          <input id="c-tit" placeholder="RESULTADOS NOM-035 · Empresa 2026"></label>
+        <label class="fld" style="margin-top:13px"><span>Autor</span>
+          <input id="c-autor" placeholder="Recursos Humanos"></label>
+        <div class="grid g2" style="gap:13px;margin-top:13px">
+          <label class="fld"><span>Área</span>
+            <input id="c-area" placeholder="Salud Ocupacional"></label>
+          <label class="fld"><span>Fecha</span>
+            <input type="date" id="c-fecha"></label>
+        </div>
+      </div>
+      <div>
+        <div class="mini">Logo</div>
+        <label class="drop bare add" id="d-logo" style="margin-bottom:15px">
+          <input type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+          <span id="logo-slot"><span class="plus">+</span></span>
+          <span class="dt">Subir el logo<em>PNG o JPG · va abajo a la derecha en cada lámina</em></span>
+        </label>
+        <label class="fld"><span>Aviso de confidencialidad <b>(opcional)</b></span>
+          <textarea id="c-disc" rows="3" placeholder="Este documento es propiedad de … y contiene información interna. Solo puede ser utilizado para el propósito para el cual ha sido proporcionado."></textarea></label>
       </div>
     </div>
-    <div>
-      <div class="sect">Padrón de colaboradores</div>
-      <label class="drop" id="d-pad" style="height:calc(100% - 26px)"><input type="file" accept=".xlsx,.xls,.csv">
-        <div class="t">Usuarios <span class="badge opt">Recomendado</span></div>
-        <div class="d">Sirve para segmentar. Necesita una columna con el número de empleado para cruzar con las respuestas; cualquier otra columna se ofrece como corte.
-        <br><br>Se reconocen automáticamente: <b>Área</b>, <b>Fecha de contratación</b> (antigüedad) y <b>Género</b> o <b>Sexo</b> si viene declarado.</div>
-        <div class="fname"></div></label>
-    </div>
+    <div class="hint" style="margin-top:15px">El aviso va como banda al pie de la portada y como una línea al pie de cada lámina. Los campos vacíos simplemente no se dibujan.</div>
   </div>
 
-  <div class="sect">Mediciones de años anteriores <span style="text-transform:none;letter-spacing:0;font-weight:400"> — para el comparativo por dominio</span></div>
-  <div class="card pad" style="margin-bottom:16px">
-    <div id="hist-list" class="grid" style="gap:10px;margin-bottom:12px"></div>
-    <label class="drop" id="d-hist" style="padding:14px"><input type="file" accept=".xlsx,.xls,.csv" multiple>
-      <div class="t" style="font-size:13.5px">Agregar export de Guía III de otro año</div>
-      <div class="d">Podés cargar varios. Después le asignás el año a cada uno.</div></label>
-  </div>
-
-  <div class="card pad" style="margin-bottom:16px">
-    <div class="sect">Opciones</div>
+  <div class="sect">Paso 5 · Opciones de cálculo</div>
+  <div class="card pad2" style="margin-bottom:24px">
     <div class="row">
       <label class="tog" id="t-gen"><input type="checkbox"> Inferir género del nombre de pila</label>
       <label class="tog on" id="t-rsv"><input type="checkbox" checked> Reservar segmentos con menos de 3 personas</label>
-      <label class="row" style="gap:8px;margin-left:4px">Empresa
-        <input class="yr" id="f-emp" style="width:230px" placeholder="Nombre del centro de trabajo"></label>
+      <label class="row" style="margin-left:4px"><span style="margin-right:9px">Empresa</span>
+        <input class="yr" id="f-emp" style="width:250px" placeholder="Nombre del centro de trabajo"></label>
     </div>
-    <div class="hint" style="margin-top:11px" id="opt-hint"></div>
+    <div class="hint" style="margin-top:12px" id="opt-hint"></div>
   </div>
 
   <div class="row">
@@ -514,11 +641,25 @@ const TRAMOS = ['Menos de 1 año', '1 a 4 años', '5 a 9 años', '10 a 14 años'
 const S = {
   files: {}, hist: [], gente: [], ets: null, g: null, m3: null, m1: null,
   padron: null, padCols: [], cuts: [], activeCuts: [], diag: {},
-  opts: { genero: false, reservar: true, empresa: '' }, minN: 3
+  opts: { genero: false, reservar: true, empresa: '' }, minN: 3,
+  cover: { titulo: '', autor: '', area: '', fecha: '', disclaimer: '', logo: null }
 };
 const LVCSS = { 'Muy alto': 'muyalto', 'Alto': 'alto', 'Medio': 'medio', 'Bajo': 'bajo', 'Nulo': 'nulo' };
 const LVHEX = { 'Muy alto': 'C00000', 'Alto': 'D97706', 'Medio': 'EAB308', 'Bajo': '5C9E45', 'Nulo': '7EB4D6' };
 const LVFG = { 'Muy alto': 'FFFFFF', 'Alto': 'FFFFFF', 'Medio': '1B3A5C', 'Bajo': 'FFFFFF', 'Nulo': '1B3A5C' };
+/* etiquetas cortas: los nombres completos no entran en el eje de los gráficos */
+const CORTO = {
+  'Condiciones en el ambiente de trabajo': 'Condiciones del ambiente',
+  'Falta de control sobre el trabajo': 'Falta de control',
+  'Interferencia en la relación trabajo-familia': 'Interferencia trabajo-familia',
+  'Insuficiente sentido de pertenencia e inestabilidad': 'Sentido de pertenencia',
+  'Reconocimiento del desempeño': 'Reconocimiento',
+  'Liderazgo y relaciones en el trabajo': 'Liderazgo y relaciones',
+  'Organización del tiempo de trabajo': 'Organización del tiempo',
+  'Factores propios de la actividad': 'Factores de la actividad'
+};
+const corto = n => CORTO[n] || n;
+
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
@@ -597,7 +738,17 @@ function zona(sel, key, multi) {
 async function recibir(el, key, files, multi) {
   try {
     if (multi) {
-      for (const f of files) S.hist.push({ file: f, rows: await leerArchivo(f), anio: '' });
+      for (const f of files) {
+        const rows = await leerArchivo(f);
+        const mm = mapearGuiaIII(rows[0]);
+        const stats = { n: rows.length - 1, mapeados: Object.keys(mm.mapa).length,
+          faltantes: mm.faltantes, valido: Object.keys(mm.mapa).length >= 40 };
+        const hit = String(f.name).match(/(?:19|20)\d{2}/);
+        let anio = hit ? hit[0] : '';
+        if (anio && S.hist.some(h => h.anio === anio)) anio = '';
+        S.hist.push({ file: f, rows, anio, stats });
+      }
+      el.querySelector('input').value = '';
       pintarHist();
     } else {
       const rows = await leerArchivo(files[0]);
@@ -611,18 +762,37 @@ async function recibir(el, key, files, multi) {
   } catch (err) { alert('Error leyendo el archivo: ' + err.message); }
 }
 function pintarHist() {
-  $('#hist-list').innerHTML = S.hist.map((h, i) => `
-    <div class="row" style="justify-content:space-between;border:1px solid var(--line);
-         border-radius:8px;padding:9px 12px">
-      <span style="font-size:13px">${esc(h.file.name)} <span class="hint">· ${h.rows.length - 1} filas</span></span>
-      <span class="row" style="gap:8px">Año <input class="yr" value="${esc(h.anio)}" data-h="${i}" placeholder="2023">
-      <button class="btn sec" style="padding:6px 11px" data-del="${i}">Quitar</button></span>
-    </div>`).join('');
-  $$('#hist-list [data-h]').forEach(i => i.addEventListener('input', e => {
-    S.hist[+e.target.dataset.h].anio = e.target.value.trim();
+  const L = $('#hist-list');
+  if (!S.hist.length) { L.innerHTML = ''; return; }
+  const anios = S.hist.map(h => h.anio).filter(Boolean);
+  const filas = S.hist.map((h, i) => {
+    const dup = h.anio && anios.filter(a => a === h.anio).length > 1;
+    const falta = !h.anio;
+    const roto = !h.stats.valido;
+    const est = roto
+      ? '<em>No parece un export de Guía III</em> — sólo ' + h.stats.mapeados + ' de 72 ítems reconocidos'
+      : h.stats.n + ' respuestas · ' + h.stats.mapeados + ' de 72 ítems reconocidos' +
+        (h.stats.faltantes.length ? ' (faltan ' + h.stats.faltantes.join(', ') + ')' : '') +
+        (dup ? ' · <em>año repetido</em>' : falta ? ' · <em>falta el año</em>' : '');
+    return `<div class="frow ${roto || dup || falta ? 'bad' : ''}">
+      <span class="fnum">${roto ? '!' : i + 1}</span>
+      <div class="fmeta"><div class="fn">${esc(h.file.name)}</div><div class="fs">${est}</div></div>
+      <span class="yrbox"><span>Año</span>
+        <input class="yr ${falta || dup ? 'warn' : ''}" value="${esc(h.anio)}" data-h="${i}"
+               placeholder="AAAA" maxlength="4" inputmode="numeric"></span>
+      <button class="xbtn" data-del="${i}" title="Quitar">×</button></div>`;
+  }).join('');
+  const pend = S.hist.filter(h => !h.anio || !h.stats.valido).length;
+  L.innerHTML = filas + (pend
+    ? `<div class="hint" style="margin:2px 0 13px">${pend} archivo(s) no entran al comparativo hasta que tengan un año válido y se reconozca el cuestionario.</div>`
+    : `<div class="hint" style="margin:2px 0 13px">${S.hist.length} medición(es) anterior(es) listas para el comparativo.</div>`);
+  $$('#hist-list [data-h]').forEach(inp => inp.addEventListener('input', e => {
+    S.hist[+e.target.dataset.h].anio = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+    clearTimeout(pintarHist._t);
+    pintarHist._t = setTimeout(pintarHist, 500);
   }));
   $$('#hist-list [data-del]').forEach(b => b.addEventListener('click', e => {
-    S.hist.splice(+e.target.dataset.del, 1); pintarHist();
+    e.preventDefault(); S.hist.splice(+e.currentTarget.dataset.del, 1); pintarHist();
   }));
 }
 function revisar() {
@@ -647,6 +817,58 @@ zona('#d-g3', 'g3'); zona('#d-g1', 'g1'); zona('#d-pad', 'pad'); zona('#d-hist',
   });
 });
 $('#f-emp').addEventListener('input', e => S.opts.empresa = e.target.value.trim());
+
+/* --------------------------------------------------------- portada */
+[['#c-tit', 'titulo'], ['#c-autor', 'autor'], ['#c-area', 'area'],
+ ['#c-fecha', 'fecha'], ['#c-disc', 'disclaimer']].forEach(([sel, k]) => {
+  const el = $(sel);
+  if (el) el.addEventListener('input', e => S.cover[k] = e.target.value.trim());
+});
+(function () {                                   // fecha de hoy por defecto
+  const f = $('#c-fecha'); if (!f) return;
+  const d = new Date(), z = n => String(n).padStart(2, '0');
+  f.value = d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+  S.cover.fecha = f.value;
+})();
+
+/* el logo se lee como data URL y se mide para respetar su proporción */
+(function () {
+  const el = $('#d-logo'); if (!el) return;
+  const inp = el.querySelector('input');
+  const tomar = file => {
+    if (!file) return;
+    if (!/^image\//.test(file.type || '')) { alert('El logo tiene que ser una imagen (PNG o JPG).'); return; }
+    const fr = new FileReader();
+    fr.onload = ev => {
+      const url = String(ev.target.result);
+      const img = new Image();
+      img.onload = () => {
+        S.cover.logo = { url, mime: file.type, b64: url.split(',')[1] || '',
+          w: img.naturalWidth || 200, h: img.naturalHeight || 200, name: file.name };
+        const slot = $('#logo-slot');
+        if (slot) slot.innerHTML = '<img class="logoimg" src="' + url + '" alt="logo">';
+        el.classList.add('done');
+      };
+      img.onerror = () => alert('No se pudo leer la imagen.');
+      img.src = url;
+    };
+    fr.readAsDataURL(file);
+  };
+  inp.addEventListener('change', () => { tomar(inp.files[0]); inp.value = ''; });
+  ['dragover', 'dragenter'].forEach(e => el.addEventListener(e, ev => {
+    ev.preventDefault(); el.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(e => el.addEventListener(e, () => el.classList.remove('over')));
+  el.addEventListener('drop', ev => { ev.preventDefault(); tomar(ev.dataTransfer.files[0]); });
+})();
+
+/* 2026-09-08 -> 8 de septiembre de 2026, sin corrimiento de zona horaria */
+function fechaLarga(iso) {
+  if (!iso) return '';
+  const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return iso;
+  return new Date(+m[1], +m[2] - 1, +m[3])
+    .toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+}
 
 /* -------------------------------------------------------------- navegación */
 function ir(p) {
@@ -758,7 +980,7 @@ function procesar() {
   if (!S.activeCuts.length) S.activeCuts = S.cuts.slice(0, 2).map(c => c.k);
 
   /* ------- histórico */
-  S.histCalc = S.hist.filter(h => h.anio).map(h => {
+  S.histCalc = S.hist.filter(h => h.anio && (!h.stats || h.stats.valido)).map(h => {
     const m = mapearGuiaIII(h.rows[0]);
     if (m.meta.usuario === undefined) m.meta.usuario = 0;
     const gs = h.rows.slice(1).filter(r => r.some(c => c !== null && c !== ''))
@@ -916,6 +1138,44 @@ function renderRes() {
     </div>${S.ets.señal ? `<div class="note w" style="margin-top:14px">${S.ets.señal} persona(s) marcaron síntomas de las Secciones III o IV sin reportar acontecimiento en la Sección I. El instrumento corta ahí y no las cuenta, lo cual es correcto — pero es una señal que vale derivar por otra vía.</div>` : ''}</div>`;
 }
 
+/* barra apilada: un tramo por nivel, con el conteo dentro si entra */
+function sbar(dist, n) {
+  const tot = n || NIV.reduce((a, k) => a + (dist[k] || 0), 0) || 1;
+  const tramos = NIV.filter(k => dist[k] > 0).map(k => {
+    const pc = dist[k] / tot * 100;
+    return `<i style="width:${pc}%;background:var(--${LVCSS[k]});color:${
+      ['Medio', 'Nulo'].includes(k) ? '#1B3A5C' : '#fff'}"
+      title="${k}: ${dist[k]}">${pc >= 9 ? dist[k] : ''}</i>`;
+  }).join('');
+  return `<span class="sbar">${tramos}</span>`;
+}
+function sfilas(defs, obj, n) {
+  return defs.map(d => `<div class="srow"><span class="lbl" title="${esc(d.name)}">${
+    esc(corto(d.name))}</span>${sbar(obj[d.name].dist, n)}</div>`).join('');
+}
+const sleyenda = () => `<div class="slg">${NIV.map(n =>
+  `<span><i style="background:var(--${LVCSS[n]})"></i>${n}</span>`).join('')}</div>`;
+
+/* tarjeta de un segmento con las tres vistas del reporte de referencia */
+function tarjetaSegmento(nombre, ag, sub) {
+  const nv = ag.total.nivel;
+  return `<div class="card pad segcard">
+    <div class="seghead"><div><div class="segn">${esc(nombre)}</div>
+      <div class="hint">${ag.n} colaborador(es)${sub ? ' · ' + esc(sub) : ''}</div></div></div>
+    <div class="segtop">
+      <div class="lvbox" style="background:var(--${LVCSS[nv]});color:${
+        ['Medio', 'Nulo'].includes(nv) ? 'var(--navy)' : '#fff'}">
+        <span>${nv}</span><small>Promedio ${fmt(ag.total.prom)} pts</small></div>
+      <div class="ntrab"><div class="mini">No. de trabajadores por nivel de riesgo</div>
+        ${sbar(ag.total.dist, ag.n)}</div>
+    </div>
+    <div class="grid g2" style="gap:26px;align-items:start;margin-top:20px">
+      <div><div class="mini">Categorías</div>${sfilas(CAT, ag.cat, ag.n)}</div>
+      <div><div class="mini">Dominios</div>${sfilas(DOM, ag.dom, ag.n)}</div>
+    </div>
+    ${sleyenda()}</div>`;
+}
+
 /* ================================================================= CORTES */
 function renderCortes() {
   $('#cut-picker').innerHTML = S.cuts.length
@@ -943,11 +1203,18 @@ function renderCortes() {
         <td class="num">${fmt(x.total.prom)}</td><td class="mid">${chip(x.total.nivel)}</td>
         <td style="font-size:12.5px">${fuera.length ? fuera.join(' · ') : '<span class="rsv">Ninguna</span>'}</td></tr>`;
     }).join('');
+    const detalle = claves.filter(v => !d[v].reservado)
+      .map(v => tarjetaSegmento(v, d[v], c.label)).join('');
+    const rsv = claves.filter(v => d[v].reservado);
     return `<div class="card pad" style="margin-bottom:16px">
       <div class="sect">${esc(c.label)}</div>
       <table><thead><tr><th>Segmento</th><th style="text-align:right">n</th>
         <th style="text-align:right">Prom. total</th><th class="mid">Nivel</th>
-        <th>Categorías fuera de «Nulo»</th></tr></thead><tbody>${filas}</tbody></table></div>`;
+        <th>Categorías fuera de «Nulo»</th></tr></thead><tbody>${filas}</tbody></table></div>
+      ${detalle}
+      ${rsv.length ? `<div class="note" style="margin-bottom:16px">Sin lámina de detalle: ${
+        rsv.map(v => esc(v) + ' (n=' + d[v].n + ')').join(' · ')
+      }. Un desglose por categoría y dominio de un segmento de menos de 3 personas es, en la práctica, su evaluación individual.</div>` : ''}`;
   }).join('') || '<div class="empty">Elegí al menos una segmentación.</div>';
 }
 
@@ -1039,7 +1306,18 @@ async function exportarExcel() {
   const R = wb.addWorksheet('Resumen', { views: [{ showGridLines: false }] });
   R.columns = [{ width: 52 }, { width: 11 }, { width: 15 }, { width: 10 }, { width: 10 },
     { width: 10 }, { width: 10 }, { width: 10 }];
-  hojaTitulo(R, 'NOM-035 · Guía III — Resumen de resultados', emp + ' · generado el ' + hoy, 8);
+  const meta = [emp, S.cover.autor && 'Autor: ' + S.cover.autor,
+    S.cover.area && 'Área: ' + S.cover.area,
+    (fechaLarga(S.cover.fecha) || hoy)].filter(Boolean).join('  ·  ');
+  hojaTitulo(R, S.cover.titulo || 'NOM-035 · Guía III — Resumen de resultados', meta, 8);
+  if (S.cover.logo) {
+    const ext = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/gif': 'gif' }[S.cover.logo.mime];
+    if (ext) try {
+      const iid = wb.addImage({ base64: S.cover.logo.b64, extension: ext });
+      const lw = 92, lh = Math.round(lw * S.cover.logo.h / S.cover.logo.w);
+      R.addImage(iid, { tl: { col: 6.15, row: 0.12 }, ext: { width: lw, height: Math.min(lh, 46) } });
+    } catch (e) { console.warn('logo no insertado en Excel', e); }
+  }
   let f = 4;
   R.getCell(f, 1).value = 'Calificación final del grupo';
   R.getCell(f, 1).font = { bold: true, size: 12, color: { argb: 'FF1B3A5C' } };
@@ -1080,6 +1358,17 @@ async function exportarExcel() {
     });
     f++;
   });
+
+  if (S.cover.disclaimer) {
+    f += 1;
+    R.mergeCells(f, 1, f, 8);
+    const c = R.getCell(f, 1);
+    c.value = S.cover.disclaimer;
+    c.font = { size: 9, italic: true, color: { argb: 'FFFFFFFF' } };
+    c.fill = FILL('1B3A5C');
+    c.alignment = { vertical: 'middle', wrapText: true, indent: 1 };
+    R.getRow(f).height = 30;
+  }
 
   /* --- Por colaborador */
   const C2 = wb.addWorksheet('Por colaborador', { views: [{ state: 'frozen', xSplit: 2, ySplit: 3 }] });
@@ -1223,6 +1512,10 @@ async function exportarExcel() {
       : (S.opts.genero ? 'INFERIDO del nombre de pila — es una estimación' : 'no disponible')],
     ['Reserva de segmentos', S.opts.reservar ? 'activa (n mínimo 3)' : 'DESACTIVADA'],
     ['Umbrales', 'Anexo de la NOM-035-STPS-2018, por dominio, categoría y calificación final'],
+    ['Nombre del documento', S.cover.titulo || '—'],
+    ['Autor / Área', [S.cover.autor, S.cover.area].filter(Boolean).join(' · ') || '—'],
+    ['Fecha del reporte', fechaLarga(S.cover.fecha) || '—'],
+    ['Aviso de confidencialidad', S.cover.disclaimer || '—'],
     ['Generado', new Date().toLocaleString('es-MX')]
   ];
   lineas.forEach((l, i) => {
@@ -1233,8 +1526,10 @@ async function exportarExcel() {
   });
 
   const buf = await wb.xlsx.writeBuffer();
+  const base = (S.cover.titulo || 'NOM-035_resultados')
+    .replace(/[^\w\sáéíóúñÁÉÍÓÚÑ.·-]/g, '').replace(/\s+/g, '_').slice(0, 60);
   bajar(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-    'NOM-035_resultados.xlsx');
+    base + '.xlsx');
 }
 
 function bajar(blob, nombre) {
@@ -1278,7 +1573,11 @@ async function exportarPptx() {
   const cobPad = S.padron ? S.gente.length / Object.keys(S.padron.map).length : null;
   const preliminar = (cobPad !== null && cobPad < 0.6) || S.gente.length < 30 || S.m3.faltantes.length > 0;
 
-  const sl = dark => { const s = P.addSlide(); s.background = { color: dark ? NAVY : WH }; return s; };
+  const hojas = [];
+  const sl = dark => {
+    const s = P.addSlide(); s.background = { color: dark ? NAVY : WH };
+    hojas.push({ s, dark: !!dark }); return s;
+  };
   const tit = (s, t, sub) => {
     s.addText(t, { x: M, y: .42, w: W - 2 * M, h: .52, fontSize: 26, bold: true, color: NAVY,
       fontFace: HEAD_F, isTextBox: true, margin: 0 });
@@ -1291,66 +1590,140 @@ async function exportarPptx() {
     s.addText(lvl || '—', { x, y, w, h, fontSize: fs || 10, bold: true, color: fg, align: 'center',
       valign: 'middle', fontFace: BODY_F, isTextBox: true, margin: 0 });
   };
-  const foot = (s, t) => s.addText(t, { x: M, y: 6.93, w: W - 2 * M, h: .3, fontSize: 9,
+  const LG = S.cover.logo, DISC = S.cover.disclaimer;
+  const logoW = 1.05, logoH = LG ? Math.min(.62, logoW * LG.h / LG.w) : 0;
+  const anchoPie = W - 2 * M - (LG ? logoW + .3 : 0);
+  const foot = (s, t) => s.addText(t, { x: M, y: 6.78, w: anchoPie, h: .28, fontSize: 8.5,
     color: MUTED, italic: true, fontFace: BODY_F, isTextBox: true, margin: 0 });
+  /* marca de pie: logo abajo a la derecha y, si lo hay, el aviso al pie */
+  const marca = (s, dark) => {
+    if (LG) s.addImage({ data: LG.url.replace(/^data:/, ''), x: W - M - logoW,
+      y: 7.5 - .28 - logoH, w: logoW, h: logoH });
+    if (DISC) s.addText(DISC, { x: M, y: 7.13, w: anchoPie, h: .26, fontSize: 6.5,
+      color: dark ? '7FA3C0' : '9AA9B7', italic: true, fontFace: BODY_F, isTextBox: true,
+      margin: 0, valign: 'middle' });
+  };
 
   /* --- portada */
   {
-    const s = sl(true);
-    s.addShape(P.ShapeType.rect, { x: 7.9, y: 0, w: 5.44, h: 7.5, fill: { color: NAVYD }, line: { color: NAVYD } });
-    s.addText('RESULTADOS NOM-035', { x: M, y: 2.3, w: 6.9, h: .6, fontSize: 33, bold: true,
-      color: WH, fontFace: HEAD_F, isTextBox: true, margin: 0 });
-    s.addText('Guía de Referencia III' + (S.ets ? ' y Guía de Referencia I' : ''),
-      { x: M, y: 2.95, w: 6.9, h: .5, fontSize: 20, color: 'A9C4DB', fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    const s = sl();                                  // clara, como la del cliente
+    const tituloDoc = S.cover.titulo || ('RESULTADOS NOM-035' + (emp !== 'Centro de trabajo' ? ' · ' + emp : ''));
+    s.addShape(P.ShapeType.ellipse, { x: -2.2, y: -1.5, w: 4.6, h: 10.5,
+      fill: { color: 'EEF3F8' }, line: { color: 'EEF3F8' } });
+    const fsTit = tituloDoc.length > 62 ? 23 : tituloDoc.length > 44 ? 27 : tituloDoc.length > 30 ? 30 : 33;
+    s.addText(tituloDoc, { x: M + .55, y: 1.32, w: 6.9, h: 1.55, fontSize: fsTit, bold: true,
+      color: NAVY, fontFace: HEAD_F, isTextBox: true, margin: 0, valign: 'top' });
+    s.addText('Guía de Referencia III' + (S.ets ? ' y Guía de Referencia I' : '') +
+      ' · Factores de riesgo psicosocial y entorno organizacional',
+      { x: M + .55, y: 2.95, w: 6.9, h: .6, fontSize: 15, color: '4A7194', fontFace: HEAD_F,
+        isTextBox: true, margin: 0 });
+    s.addText(S.gente.length + ' respuestas · ' + nItems + ' de 72 ítems' +
+      (cobPad !== null ? ' · ' + Math.round(cobPad * 100) + '% de participación' : ''),
+      { x: M + .55, y: 3.62, w: 6.9, h: .32, fontSize: 12, color: MUTED, fontFace: BODY_F,
+        isTextBox: true, margin: 0 });
     if (preliminar) {
-      s.addShape(P.ShapeType.roundRect, { x: M, y: 3.8, w: 4.15, h: .42,
+      s.addShape(P.ShapeType.roundRect, { x: M + .55, y: 4.12, w: 4.15, h: .42,
         fill: { color: 'D97706' }, line: { color: 'D97706' }, rectRadius: .06 });
-      s.addText('MUESTRA DE PARAMETRIZACIÓN', { x: M, y: 3.8, w: 4.15, h: .42, fontSize: 11,
-        bold: true, color: WH, align: 'center', valign: 'middle', fontFace: BODY_F, isTextBox: true, margin: 0 });
-      s.addText('No apto para difusión ni para el registro de la NOM-035.', { x: M, y: 4.34, w: 6.9,
-        h: .4, fontSize: 12, color: 'A9C4DB', fontFace: BODY_F, isTextBox: true, margin: 0 });
+      s.addText('MUESTRA DE PARAMETRIZACIÓN', { x: M + .55, y: 4.12, w: 4.15, h: .42,
+        fontSize: 11, bold: true, color: WH, align: 'center', valign: 'middle',
+        fontFace: BODY_F, isTextBox: true, margin: 0 });
+      s.addText('No apto para difusión ni para el registro de la NOM-035.',
+        { x: M + .55, y: 4.62, w: 6.9, h: .32, fontSize: 11, color: MUTED, fontFace: BODY_F,
+          isTextBox: true, margin: 0 });
     }
-    [['Centro de trabajo', emp], ['Respuestas', S.gente.length + ' en Guía III' + (S.ets ? ' · ' + S.ets.lst.length + ' en Guía I' : '')],
-     ['Ítems evaluados', nItems + ' de 72'],
-     ['Padrón', S.padron ? Object.keys(S.padron.map).length + ' personas · ' + Math.round(cobPad * 100) + '% de participación' : 'no cargado'],
-     ['Generado', new Date().toLocaleDateString('es-MX')]].forEach((p, i) => {
-      const y = 2.0 + i * .72;
-      s.addText(p[0], { x: 8.5, y, w: 4.3, h: .26, fontSize: 10, color: '7FA3C0', fontFace: BODY_F, isTextBox: true, margin: 0 });
-      s.addText(String(p[1]), { x: 8.5, y: y + .26, w: 4.3, h: .34, fontSize: 13, bold: true,
-        color: WH, fontFace: BODY_F, isTextBox: true, margin: 0 });
-    });
+    /* caja de datos: sólo las filas que el usuario completó */
+    const datos = [['Fecha', fechaLarga(S.cover.fecha)], ['Autor', S.cover.autor],
+      ['Área', S.cover.area]].filter(d => d[1]);
+    if (datos.length) {
+      const bh = .58 + datos.length * .56, by = 1.9;
+      s.addShape(P.ShapeType.roundRect, { x: 8.35, y: by, w: 4.35, h: bh, fill: { color: WH },
+        line: { color: NAVY, width: 1.25 }, rectRadius: .06 });
+      datos.forEach((d, i) => {
+        const y = by + .29 + i * .56;
+        s.addText(d[0] + ':', { x: 8.55, y, w: 1.15, h: .4, fontSize: 12, color: '4A7194',
+          align: 'right', fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+        s.addText(String(d[1]), { x: 9.85, y, w: 2.7, h: .4, fontSize: 13, color: INK,
+          fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+      });
+    }
+    /* logo arriba de la banda, abajo a la derecha */
+    const bandaY = DISC ? 6.5 : 7.5;
+    if (LG) {
+      const lw = 1.7, lh = Math.min(1.0, lw * LG.h / LG.w);
+      s.addImage({ data: LG.url.replace(/^data:/, ''), x: W - M - lw,
+        y: bandaY - .35 - lh, w: lw, h: lh });
+    }
+    if (DISC) {
+      s.addShape(P.ShapeType.rect, { x: 0, y: bandaY, w: W, h: 1.0,
+        fill: { color: NAVY }, line: { color: NAVY } });
+      s.addText(DISC, { x: M, y: bandaY, w: W - 2 * M - 1.6, h: 1.0, fontSize: 10.5,
+        color: WH, italic: true, bold: true, fontFace: BODY_F, isTextBox: true, margin: 0,
+        valign: 'middle' });
+      s.addText('Material de uso interno', { x: W - M - 2.2, y: bandaY, w: 2.2, h: 1.0,
+        fontSize: 9, color: 'A9C4DB', align: 'right', fontFace: BODY_F, isTextBox: true,
+        margin: 0, valign: 'middle' });
+    }
+    s.addNotes('Portada configurada desde la app. ' + S.gente.length + ' respuestas, ' +
+      nItems + ' de 72 ítems.');
   }
 
-  /* --- general */
-  {
-    const s = sl(); const g = S.g;
-    tit(s, 'Guía III — Resultado general', 'Factores de riesgo psicosocial y entorno organizacional · ' + S.gente.length + ' colaboradores');
-    s.addShape(P.ShapeType.roundRect, { x: M, y: 1.75, w: 4.1, h: 2.5,
-      fill: { color: LVHEX[g.total.nivel] }, line: { color: LVHEX[g.total.nivel] }, rectRadius: .06 });
-    const fg = LVFG[g.total.nivel];
-    s.addText('Nivel de riesgo del centro de trabajo', { x: M + .3, y: 2.0, w: 3.5, h: .4,
-      fontSize: 11, color: fg, fontFace: BODY_F, isTextBox: true, margin: 0 });
-    s.addText(g.total.nivel, { x: M + .3, y: 2.4, w: 3.5, h: 1.0, fontSize: 50, bold: true,
-      color: fg, fontFace: HEAD_F, isTextBox: true, margin: 0 });
-    s.addText('Calificación final del grupo: ' + g.total.prom + ' puntos', { x: M + .3, y: 3.45,
-      w: 3.5, h: .4, fontSize: 12.5, bold: true, color: fg, fontFace: BODY_F, isTextBox: true, margin: 0 });
-    s.addText('Distribución de los ' + S.gente.length + ' colaboradores por nivel individual',
-      { x: M + 4.55, y: 1.72, w: 7.5, h: .3, fontSize: 11, bold: true, color: MUTED, fontFace: BODY_F, isTextBox: true, margin: 0 });
-    NIV.forEach((n, i) => {
-      const y = 2.12 + i * .52, v = g.total.dist[n], on = v > 0;
-      s.addText(n, { x: M + 4.55, y, w: 1.45, h: .42, fontSize: 11, bold: on, color: on ? INK : MUTED,
-        fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
-      s.addShape(P.ShapeType.rect, { x: M + 6.08, y: y + .07, w: 5.35, h: .28,
-        fill: { color: 'F4F7FA' }, line: { color: LINE } });
-      if (on) s.addShape(P.ShapeType.rect, { x: M + 6.08, y: y + .07, w: 5.35 * v / S.gente.length,
-        h: .28, fill: { color: LVHEX[n] }, line: { color: LVHEX[n] } });
-      s.addText(String(v), { x: M + 11.52, y, w: .5, h: .42, fontSize: 11, bold: on,
-        color: on ? NAVY : LINE, fontFace: BODY_F, isTextBox: true, margin: 0, valign: 'middle' });
+  /* --------------------------------------------------------------------------
+     Lámina con las tres vistas del reporte de referencia: nivel del grupo,
+     trabajadores por nivel, y distribución por categoría y por dominio.
+     Los gráficos son nativos de PowerPoint, así que el cliente puede editarlos.
+     -------------------------------------------------------------------------*/
+  const apilado = (s, defs, ag, x, y, w, h, leyenda, gap) => {
+    const labels = defs.map(d => corto(d.name)).reverse();      // eje de abajo hacia arriba
+    const data = NIV.map(n => ({ name: n, labels,
+      values: defs.map(d => ag[d.name].dist[n]).reverse() }));
+    s.addChart(P.ChartType.bar, data, {
+      x, y, w, h,
+      barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: gap || 42,
+      chartColors: NIV.map(n => LVHEX[n]),
+      showValue: true, dataLabelPosition: 'ctr', dataLabelFontSize: 8,
+      dataLabelColor: NAVY, dataLabelFontFace: BODY_F, dataLabelFormatCode: '0;;;',
+      showLegend: !!leyenda, legendPos: 'b', legendFontSize: 8, legendColor: MUTED,
+      catAxisLabelFontSize: 8.5, catAxisLabelColor: INK, catAxisLabelFontFace: BODY_F,
+      catAxisLineShow: false, catGridLine: { style: 'none' },
+      valAxisHidden: true, valGridLine: { style: 'none' },
+      valAxisMinVal: 0, valAxisMaxVal: ag.n,
+      showTitle: false, fill: WH, border: { pt: 0, color: WH }
     });
-    if (S.m3.faltantes.length) foot(s, 'La calificación final se calcula sobre ' + nItems +
-      ' de los 72 ítems: faltan en el cuestionario los ítems ' + S.m3.faltantes.join(', ') +
-      '. Los dominios que los contienen quedan subestimados.');
-  }
+  };
+
+  const laminaDist = (titulo, sub, ag, nota) => {
+    const s = sl(), nv = ag.total.nivel;
+    tit(s, titulo, sub);
+    /* nivel del grupo */
+    s.addShape(P.ShapeType.roundRect, { x: M, y: 1.44, w: 2.85, h: 1.6,
+      fill: { color: LVHEX[nv] }, line: { color: LVHEX[nv] }, rectRadius: .07 });
+    s.addText(nv, { x: M, y: 1.56, w: 2.85, h: .82, fontSize: 30, bold: true,
+      color: LVFG[nv], align: 'center', valign: 'middle', fontFace: HEAD_F,
+      isTextBox: true, margin: 0 });
+    s.addText('Promedio ' + ag.total.prom + ' pts · ' + ag.n + ' colaborador(es)',
+      { x: M, y: 2.38, w: 2.85, h: .38, fontSize: 10.5, bold: true, color: LVFG[nv],
+        align: 'center', fontFace: BODY_F, isTextBox: true, margin: 0 });
+    /* trabajadores por nivel */
+    apilado(s, [{ name: 'No. de trabajadores' }], { n: ag.n, 'No. de trabajadores': ag.total },
+      3.55, 1.4, 9.15, 1.68, true, 260);
+    /* categorías y dominios */
+    s.addText('Categorías', { x: M, y: 3.24, w: 6, h: .3, fontSize: 13, bold: true,
+      color: NAVY, fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    apilado(s, CAT, ag.cat, M - .08, 3.54, 6.1, 3.02, true);
+    s.addText('Dominios', { x: 6.78, y: 3.24, w: 6, h: .3, fontSize: 13, bold: true,
+      color: NAVY, fontFace: HEAD_F, isTextBox: true, margin: 0 });
+    apilado(s, DOM, ag.dom, 6.7, 3.54, 6.05, 3.02, true);
+    if (nota) foot(s, nota);
+    return s;
+  };
+
+  /* --- general */
+  laminaDist('Guía III — Resultado general',
+    'El promedio de toda la población evaluada · ' + S.gente.length + ' respuestas',
+    S.g, S.m3.faltantes.length
+      ? 'La calificación final se calcula sobre ' + nItems + ' de los 72 ítems: faltan los ítems ' +
+        S.m3.faltantes.join(', ') + '. Los dominios que los contienen quedan subestimados.'
+      : null);
 
   /* --- tabla de categorías y dominios */
   const tablaSlide = (titulo, sub, defs, ag, rowH) => {
@@ -1461,8 +1834,25 @@ async function exportarPptx() {
           margin: 0, valign: 'middle' });
       }
     });
+    /* notas al pie de la tabla índice, en vez de una lámina casi vacía */
+    const omitidos = claves.filter(v => d[v].reservado);
+    const notas = [];
     if (k === 'genero' && !(S.padron && S.padron.tieneGenero))
-      foot(s, 'Género inferido del nombre de pila: es una estimación, no un dato declarado por la persona. No apto para un reporte de cumplimiento.');
+      notas.push('Género inferido del nombre de pila: es una estimación, no un dato declarado. No apto para un reporte de cumplimiento.');
+    if (omitidos.length) notas.push(omitidos.length + ' segmento(s) sin lámina de detalle por confidencialidad — ' +
+      omitidos.map(v => v + ' (n=' + d[v].n + ')').join(' · ') +
+      ': un desglose por categoría y dominio de menos de 3 personas es su evaluación individual.');
+    if (notas.length) foot(s, notas.join('  ·  '));
+
+    /* detalle por segmento, sólo los reportables y con tope para no inflar el deck */
+    const reportables = claves.filter(v => !d[v].reservado);
+    const TOPE = 12;
+    reportables.slice(0, TOPE).forEach(v => laminaDist(
+      'El promedio por ' + c.label.toLowerCase() + ': ' + v,
+      d[v].n + ' test realizados' + (k === 'genero' && !(S.padron && S.padron.tieneGenero)
+        ? ' · género inferido del nombre, es una estimación' : ''),
+      d[v], reportables.length > TOPE && reportables.indexOf(v) === TOPE - 1
+        ? 'Se muestran los primeros ' + TOPE + ' segmentos de ' + reportables.length + '.' : null));
   });
 
   /* --- Guía I */
@@ -1560,7 +1950,11 @@ async function exportarPptx() {
     });
   }
 
-  await P.writeFile({ fileName: 'NOM-035_reporte.pptx' });
+  /* logo y aviso en todas las láminas menos la portada, que lleva la banda */
+  hojas.forEach((h, i) => { if (i > 0) marca(h.s, h.dark); });
+
+  await P.writeFile({ fileName: (S.cover.titulo || 'NOM-035_reporte')
+    .replace(/[^\w\sáéíóúñÁÉÍÓÚÑ.·-]/g, '').replace(/\s+/g, '_').slice(0, 60) + '.pptx' });
 }
 
 /* --------------------------------------------------------------- botones */
